@@ -91,14 +91,16 @@ function notificarAsignacionNueva(sheet, filaNueva) {
   }
 }
 
-// Lee la hoja "Proveedores" y arma un mapa { PREFIJO: "NombreResponsable" }
-// a partir de la columna A (Nomenclatura, ej. "100") y la columna E
+// Lee la hoja "Proveedores" y arma un mapa
+// { PREFIJO: { responsable: "...", commodity: "..." } } a partir de la
+// columna A (Nomenclatura), columna D (Commodity) y columna E
 // (Responsable). Como una misma nomenclatura puede repetirse en varias
-// filas de proveedores distintos (cada uno con su propio Responsable
-// capturado), el prefijo se asigna a quien aparezca MAS VECES para esa
-// nomenclatura (mayoria), no al de la ultima fila leida.
-function obtenerMapaPrefijosSourcing() {
-  var conteoPorPrefijo = {}; // { prefijo: { responsable: cantidadDeFilas, ... } }
+// filas de proveedores distintos (cada uno con su propio Commodity/
+// Responsable capturado), cada dato se asigna al que aparezca MAS VECES
+// para esa nomenclatura (mayoria), no al de la ultima fila leida.
+function obtenerMapaPrefijos_() {
+  var conteoResponsable = {}; // { prefijo: { responsable: cantidadDeFilas } }
+  var conteoCommodity = {};   // { prefijo: { commodity: cantidadDeFilas } }
   var ss = SpreadsheetApp.openByUrl(SHEET_URL);
   var hoja = ss.getSheetByName("Proveedores");
   if (!hoja) return {};
@@ -106,61 +108,83 @@ function obtenerMapaPrefijosSourcing() {
   var datos = hoja.getDataRange().getValues();
   for (var i = 1; i < datos.length; i++) {
     var prefijo = String(datos[i][0] || "").trim().toUpperCase(); // col A: Nomenclatura
+    var commodity = String(datos[i][3] || "").trim();             // col D: Commodity
     var responsable = String(datos[i][4] || "").trim();           // col E: Responsable
-    if (!prefijo || !responsable) continue;
+    if (!prefijo) continue;
 
-    if (!conteoPorPrefijo[prefijo]) conteoPorPrefijo[prefijo] = {};
-    conteoPorPrefijo[prefijo][responsable] = (conteoPorPrefijo[prefijo][responsable] || 0) + 1;
+    if (responsable) {
+      if (!conteoResponsable[prefijo]) conteoResponsable[prefijo] = {};
+      conteoResponsable[prefijo][responsable] = (conteoResponsable[prefijo][responsable] || 0) + 1;
+    }
+    if (commodity) {
+      if (!conteoCommodity[prefijo]) conteoCommodity[prefijo] = {};
+      conteoCommodity[prefijo][commodity] = (conteoCommodity[prefijo][commodity] || 0) + 1;
+    }
   }
 
-  var mapa = {};
-  Object.keys(conteoPorPrefijo).forEach(function(prefijo) {
-    var conteos = conteoPorPrefijo[prefijo];
-    var mejorResponsable = null;
-    var mejorConteo = 0;
-    Object.keys(conteos).forEach(function(responsable) {
-      if (conteos[responsable] > mejorConteo) {
-        mejorConteo = conteos[responsable];
-        mejorResponsable = responsable;
-      }
+  function masFrecuentePorPrefijo(conteoPorPrefijo) {
+    var mapa = {};
+    Object.keys(conteoPorPrefijo).forEach(function(prefijo) {
+      var conteos = conteoPorPrefijo[prefijo];
+      var mejorValor = null;
+      var mejorConteo = 0;
+      Object.keys(conteos).forEach(function(valor) {
+        if (conteos[valor] > mejorConteo) {
+          mejorConteo = conteos[valor];
+          mejorValor = valor;
+        }
+      });
+      mapa[prefijo] = mejorValor;
     });
-    mapa[prefijo] = mejorResponsable;
+    return mapa;
+  }
+
+  var mapaResponsables = masFrecuentePorPrefijo(conteoResponsable);
+  var mapaCommodities = masFrecuentePorPrefijo(conteoCommodity);
+
+  var resultado = {};
+  Object.keys(mapaResponsables).forEach(function(prefijo) {
+    if (!resultado[prefijo]) resultado[prefijo] = {};
+    resultado[prefijo].responsable = mapaResponsables[prefijo];
   });
-  return mapa;
+  Object.keys(mapaCommodities).forEach(function(prefijo) {
+    if (!resultado[prefijo]) resultado[prefijo] = {};
+    resultado[prefijo].commodity = mapaCommodities[prefijo];
+  });
+  return resultado;
 }
 
 // Al llegar una tarea nueva, toma los primeros 3 caracteres del codigo de
-// pieza (columna E de la hoja principal) y busca a que persona de Sourcing
-// le corresponde ese prefijo segun la hoja "Proveedores". Si el prefijo no
-// esta dado de alta o la tarea ya trae Sourcing asignado, no hace nada.
-// Mismo criterio que esSourcingSinAsignar() del frontend: la columna M
-// puede traer una formula que devuelve texto de error (#N/A, etc.) cuando
-// no encuentra a nadie, y eso NO cuenta como "ya asignado".
-function esSourcingSinAsignar_(valor) {
-  if (!valor) return true;
-  var v = String(valor).trim().toUpperCase();
-  return v === "#N/A" || v === "#N/D" || v === "N/A" || v === "#REF!" || v === "#ERROR!";
-}
-
+// pieza (columna E de la hoja principal) y, segun la hoja "Proveedores",
+// escribe el Commodity (columna K) y el Sourcing (columna M) que le
+// corresponden a ese prefijo. Siempre sobreescribe esas dos celdas (aunque
+// ya tengan una formula o un valor previo) porque la fuente de verdad para
+// esos dos campos es la pestana Proveedores, no lo que haya en la hoja
+// principal. Si el prefijo no esta dado de alta en Proveedores, no toca
+// nada (se deja lo que ya hubiera ahi).
 function asignarSourcingPorPrefijo(sheet, filaNueva) {
-  var sourcingActual = sheet.getRange(filaNueva, 13).getValue(); // col M
-  if (!esSourcingSinAsignar_(sourcingActual)) return; // ya tiene alguien real asignado, no se pisa
-
   var codigo = sheet.getRange(filaNueva, 5).getValue(); // col E
   if (!codigo) return;
 
   var prefijo = String(codigo).trim().toUpperCase().substring(0, 3);
   if (!prefijo) return;
 
-  var mapa = obtenerMapaPrefijosSourcing();
-  var responsable = mapa[prefijo];
-  if (!responsable) {
+  var info = obtenerMapaPrefijos_()[prefijo];
+  if (!info) {
     Logger.log("asignarSourcingPorPrefijo: prefijo '" + prefijo + "' (codigo " + codigo + ") no esta dado de alta en Proveedores.");
     return;
   }
 
-  sheet.getRange(filaNueva, 13).setValue(responsable);
-  Logger.log("Fila " + filaNueva + " (codigo " + codigo + ", prefijo " + prefijo + ") asignada automaticamente a " + responsable + ".");
+  if (info.commodity) {
+    sheet.getRange(filaNueva, 11).setValue(info.commodity); // col K: Commodity
+  }
+  if (info.responsable) {
+    sheet.getRange(filaNueva, 13).setValue(info.responsable); // col M: Sourcing
+  }
+  Logger.log(
+    "Fila " + filaNueva + " (codigo " + codigo + ", prefijo " + prefijo + ") actualizada -> " +
+    "Commodity: " + (info.commodity || "(sin dato)") + ", Sourcing: " + (info.responsable || "(sin dato)")
+  );
 }
 
 function notificarError(origen, detalle) {
