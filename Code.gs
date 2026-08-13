@@ -461,6 +461,71 @@ function cancelarRFQ(rfqId, motivo) {
   return {status: 'error', message: 'No se encontro el RFQ ' + rfqId + ' en el Log RFQ.'};
 }
 
+// Reintenta encontrar la respuesta de un RFQ puntual, para cuando el
+// escaneo automatico (revisarRespuestasRFQ) no lo detecto. A diferencia
+// del escaneo automatico, esta busqueda es mas flexible: no exige que el
+// remitente coincida exacto con el correo del proveedor (por si respondio
+// desde otra cuenta), no se restringe a hilos sin la etiqueta
+// "RFQ-Procesado", y busca hasta 90 dias atras en vez de 30. Solo exige
+// que el asunto tenga el "[ID]" exacto y que el mensaje traiga un .xlsx.
+function reintentarDeteccionRFQ(rfqId) {
+  var hojaLog = obtenerHojaLogRFQ();
+  var datos = hojaLog.getDataRange().getValues();
+  var filaLog = null;
+  for (var i = 1; i < datos.length; i++) {
+    if (datos[i][0] === rfqId) { filaLog = i + 1; break; }
+  }
+  if (!filaLog) {
+    return { status: 'error', message: 'No se encontro el RFQ ' + rfqId + ' en el Log RFQ.' };
+  }
+
+  var NOMBRE_ETIQUETA = "RFQ-Procesado";
+  var etiqueta = GmailApp.getUserLabelByName(NOMBRE_ETIQUETA);
+  if (!etiqueta) etiqueta = GmailApp.createLabel(NOMBRE_ETIQUETA);
+
+  var hilos = GmailApp.search('has:attachment newer_than:90d "[' + rfqId + ']"');
+  Logger.log("reintentarDeteccionRFQ: " + hilos.length + " hilo(s) encontrados para RFQ " + rfqId);
+
+  for (var h = 0; h < hilos.length; h++) {
+    var mensajes = hilos[h].getMessages();
+    for (var m = 0; m < mensajes.length; m++) {
+      var msg = mensajes[m];
+      if (msg.getSubject().indexOf("[" + rfqId + "]") === -1) continue;
+
+      var adjuntos = msg.getAttachments();
+      var adjuntoExcel = null;
+      for (var a = 0; a < adjuntos.length; a++) {
+        if (/\.xlsx$/i.test(adjuntos[a].getName())) { adjuntoExcel = adjuntos[a]; break; }
+      }
+      if (!adjuntoExcel) continue;
+
+      try {
+        var datosExcel = leerDatosDeExcelAdjunto(adjuntoExcel);
+        var estadoFinal = datosExcel.precio ? "Respondido" : "Respondido incompleto";
+        hojaLog.getRange(filaLog, 10).setValue(estadoFinal);
+        hojaLog.getRange(filaLog, 11).setValue(new Date());
+        hojaLog.getRange(filaLog, 12).setValue(datosExcel.precio);
+        hojaLog.getRange(filaLog, 13).setValue(datosExcel.moneda);
+        hojaLog.getRange(filaLog, 14).setValue(datosExcel.moq);
+        hojaLog.getRange(filaLog, 15).setValue(datosExcel.entrega);
+        hojaLog.getRange(filaLog, 16).setValue(datosExcel.comentarios);
+        hilos[h].addLabel(etiqueta);
+        Logger.log("reintentarDeteccionRFQ: RFQ " + rfqId + " actualizado a " + estadoFinal + ".");
+        return {
+          status: 'ok', estado: estadoFinal, precio: datosExcel.precio, moneda: datosExcel.moneda,
+          moq: datosExcel.moq, entrega: datosExcel.entrega, comentarios: datosExcel.comentarios,
+          fechaRespuesta: new Date().toISOString()
+        };
+      } catch (err) {
+        Logger.log("reintentarDeteccionRFQ: error leyendo el excel: " + err.message);
+        return { status: 'error', message: 'Se encontro un correo con el ID pero no se pudo leer el Excel: ' + err.message };
+      }
+    }
+  }
+
+  return { status: 'error', message: 'No se encontro ningun correo con "[' + rfqId + ']" en el asunto y un adjunto .xlsx en los ultimos 90 dias.' };
+}
+
 function reasignarTarea(filaIndex, nuevoResponsable) {
   var sheet = SpreadsheetApp.openByUrl(SHEET_URL).getSheets()[0];
   sheet.getRange(filaIndex, 13).setValue(nuevoResponsable);

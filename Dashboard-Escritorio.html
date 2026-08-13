@@ -783,6 +783,42 @@
         }
       } else {
         if (c.estado === "Enviado" || c.estado === "Respondido incompleto") {
+          var btnReintentarCot = document.createElement("button");
+          btnReintentarCot.className = "btn-reintentar-cot";
+          btnReintentarCot.textContent = "Reintentar deteccion";
+          btnReintentarCot.title = "Vuelve a buscar en Gmail la respuesta de este RFQ, sin exigir que el remitente coincida exacto";
+          btnReintentarCot.onclick = (function(cot, boton) {
+            return function() {
+              boton.disabled = true;
+              var textoOriginal = boton.textContent;
+              boton.textContent = "Buscando...";
+              google.script.run
+                .withSuccessHandler(function(resultado) {
+                  boton.disabled = false;
+                  boton.textContent = textoOriginal;
+                  if (!resultado || resultado.status !== 'ok') {
+                    alert("No se encontro la respuesta: " + (resultado && resultado.message ? resultado.message : "sin detalle."));
+                    return;
+                  }
+                  cot.estado = resultado.estado;
+                  cot.precio = resultado.precio;
+                  cot.moneda = resultado.moneda;
+                  cot.moq = resultado.moq;
+                  cot.entrega = resultado.entrega;
+                  cot.comentarios = resultado.comentarios;
+                  cot.fechaRespuesta = resultado.fechaRespuesta;
+                  abrirComparativa(d);
+                })
+                .withFailureHandler(function(err) {
+                  boton.disabled = false;
+                  boton.textContent = textoOriginal;
+                  alert("No se pudo reintentar: " + (err && err.message ? err.message : err));
+                })
+                .reintentarDeteccionRFQ(cot.rfqId);
+            };
+          })(c, btnReintentarCot);
+          tdAccionesCot.appendChild(btnReintentarCot);
+
           var btnCancelarCot = document.createElement("button");
           btnCancelarCot.className = "btn-cancelar-cot";
           btnCancelarCot.textContent = "Cancelar";

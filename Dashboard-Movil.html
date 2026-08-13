@@ -870,9 +870,45 @@
         (c.comentarios ? ('<div class="text-[11.5px] text-on-surface-variant mt-1">' + c.comentarios + '</div>') : "");
 
       var filaBtns = document.createElement("div");
-      filaBtns.className = "flex gap-2 mt-2";
+      filaBtns.className = "flex gap-2 mt-2 flex-wrap";
       if (c.estado !== "Cancelado") {
         if (c.estado === "Enviado" || c.estado === "Respondido incompleto") {
+          var btnReintentarCot = document.createElement("button");
+          btnReintentarCot.className = "btn-mini btn-mini-outline";
+          btnReintentarCot.textContent = "Reintentar deteccion";
+          btnReintentarCot.title = "Vuelve a buscar en Gmail la respuesta de este RFQ, sin exigir que el remitente coincida exacto";
+          btnReintentarCot.onclick = (function(cot, boton) {
+            return function() {
+              boton.disabled = true;
+              var textoOriginal = boton.textContent;
+              boton.textContent = "Buscando...";
+              google.script.run
+                .withSuccessHandler(function(resultado) {
+                  boton.disabled = false;
+                  boton.textContent = textoOriginal;
+                  if (!resultado || resultado.status !== 'ok') {
+                    alert("No se encontro la respuesta: " + (resultado && resultado.message ? resultado.message : "sin detalle."));
+                    return;
+                  }
+                  cot.estado = resultado.estado;
+                  cot.precio = resultado.precio;
+                  cot.moneda = resultado.moneda;
+                  cot.moq = resultado.moq;
+                  cot.entrega = resultado.entrega;
+                  cot.comentarios = resultado.comentarios;
+                  cot.fechaRespuesta = resultado.fechaRespuesta;
+                  abrirComparativaM(d);
+                })
+                .withFailureHandler(function(err) {
+                  boton.disabled = false;
+                  boton.textContent = textoOriginal;
+                  alert("No se pudo reintentar: " + (err && err.message ? err.message : err));
+                })
+                .reintentarDeteccionRFQ(cot.rfqId);
+            };
+          })(c, btnReintentarCot);
+          filaBtns.appendChild(btnReintentarCot);
+
           var btnCancelarCot = document.createElement("button");
           btnCancelarCot.className = "btn-mini btn-mini-danger";
           btnCancelarCot.textContent = "Cancelar";
