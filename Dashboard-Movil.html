@@ -857,28 +857,37 @@
 
       var filaBtns = document.createElement("div");
       filaBtns.className = "flex gap-2 mt-2";
-      if (c.estado === "Enviado") {
-        var btnCancelarCot = document.createElement("button");
-        btnCancelarCot.className = "btn-mini btn-mini-danger";
-        btnCancelarCot.textContent = "Cancelar";
-        btnCancelarCot.onclick = (function(cot, boton) {
-          return function() {
-            if (!confirm("Esto detiene los recordatorios automáticos para " + (cot.proveedor || cot.correo) + ".\n¿Confirmas?")) return;
-            boton.disabled = true; boton.textContent = "...";
-            google.script.run
-              .withSuccessHandler(function() { cot.estado = "Cancelado"; abrirComparativaM(d); })
-              .withFailureHandler(function(err) { boton.disabled = false; boton.textContent = "Cancelar"; alert("No se pudo cancelar: " + (err && err.message ? err.message : err)); })
-              .cancelarRFQ(cot.rfqId);
-          };
-        })(c, btnCancelarCot);
-        filaBtns.appendChild(btnCancelarCot);
+      if (c.estado !== "Cancelado") {
+        if (c.estado === "Enviado" || c.estado === "Respondido incompleto") {
+          var btnCancelarCot = document.createElement("button");
+          btnCancelarCot.className = "btn-mini btn-mini-danger";
+          btnCancelarCot.textContent = "Cancelar";
+          btnCancelarCot.onclick = (function(cot, boton) {
+            return function() {
+              var motivo = prompt("Motivo de la cancelación (obligatorio):", "");
+              if (motivo === null) return;
+              motivo = motivo.trim();
+              if (!motivo) { alert("Debes escribir un motivo para cancelar."); return; }
+              boton.disabled = true; boton.textContent = "...";
+              google.script.run
+                .withSuccessHandler(function(resultado) {
+                  cot.estado = "Cancelado";
+                  cot.comentarios = (resultado && resultado.comentarios) ? resultado.comentarios : ("Cancelado: " + motivo);
+                  abrirComparativaM(d);
+                })
+                .withFailureHandler(function(err) { boton.disabled = false; boton.textContent = "Cancelar"; alert("No se pudo cancelar: " + (err && err.message ? err.message : err)); })
+                .cancelarRFQ(cot.rfqId, motivo);
+            };
+          })(c, btnCancelarCot);
+          filaBtns.appendChild(btnCancelarCot);
+        }
+        var btnCargarPrecio = document.createElement("button");
+        btnCargarPrecio.className = "btn-mini btn-mini-green";
+        btnCargarPrecio.textContent = "Cargar precio";
+        btnCargarPrecio.title = "Próximamente: cargar el precio directo en DMT";
+        btnCargarPrecio.onclick = function() { alert("Esta función todavía no hace nada: se va a conectar con DMT próximamente."); };
+        filaBtns.appendChild(btnCargarPrecio);
       }
-      var btnCargarPrecio = document.createElement("button");
-      btnCargarPrecio.className = "btn-mini btn-mini-green";
-      btnCargarPrecio.textContent = "Cargar precio";
-      btnCargarPrecio.title = "Próximamente: cargar el precio directo en DMT";
-      btnCargarPrecio.onclick = function() { alert("Esta función todavía no hace nada: se va a conectar con DMT próximamente."); };
-      filaBtns.appendChild(btnCargarPrecio);
       card.appendChild(filaBtns);
 
       lista.appendChild(card);

@@ -408,13 +408,21 @@ function obtenerCotizacionesPorPieza() {
   return mapa;
 }
 
-function cancelarRFQ(rfqId) {
+function cancelarRFQ(rfqId, motivo) {
+  if (!motivo || !String(motivo).trim()) {
+    throw new Error("Debes indicar el motivo de la cancelacion.");
+  }
   var hojaLog = obtenerHojaLogRFQ();
   var datos = hojaLog.getDataRange().getValues();
   for (var i = 1; i < datos.length; i++) {
     if (datos[i][0] === rfqId) {
-      hojaLog.getRange(i + 1, 10).setValue("Cancelado");
-      return {status: 'ok'};
+      var filaReal = i + 1;
+      var comentarioExistente = String(datos[i][15] || "").trim(); // col P: Comentarios
+      var notaCancelacion = "Cancelado: " + motivo;
+      var comentarioFinal = comentarioExistente ? (notaCancelacion + " | " + comentarioExistente) : notaCancelacion;
+      hojaLog.getRange(filaReal, 10).setValue("Cancelado");
+      hojaLog.getRange(filaReal, 16).setValue(comentarioFinal);
+      return {status: 'ok', comentarios: comentarioFinal};
     }
   }
   return {status: 'error', message: 'No se encontro el RFQ ' + rfqId + ' en el Log RFQ.'};

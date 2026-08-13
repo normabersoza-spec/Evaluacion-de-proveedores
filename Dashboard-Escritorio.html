@@ -770,42 +770,52 @@
       tr.appendChild(tdFechaResp);
 
       var tdAccionesCot = document.createElement("td");
-      if (c.estado === "Enviado") {
-        var btnCancelarCot = document.createElement("button");
-        btnCancelarCot.className = "btn-cancelar-cot";
-        btnCancelarCot.textContent = "Cancelar";
-        btnCancelarCot.onclick = (function(cot, boton) {
-          return function() {
-            var confirmar = confirm(
-              "Esto detiene los recordatorios automaticos para " + (cot.proveedor || cot.correo) + ".\n¿Confirmas?"
-            );
-            if (!confirmar) return;
-            boton.disabled = true;
-            boton.textContent = "...";
-            google.script.run
-              .withSuccessHandler(function() {
-                cot.estado = "Cancelado";
-                abrirComparativa(d);
-              })
-              .withFailureHandler(function(err) {
-                boton.disabled = false;
-                boton.textContent = "Cancelar";
-                alert("No se pudo cancelar: " + (err && err.message ? err.message : err));
-              })
-              .cancelarRFQ(cot.rfqId);
-          };
-        })(c, btnCancelarCot);
-        tdAccionesCot.appendChild(btnCancelarCot);
-      }
+      if (c.estado === "Cancelado") {
+        if (c.comentarios) {
+          var pMotivoCancelacion = document.createElement("div");
+          pMotivoCancelacion.className = "pendiente";
+          pMotivoCancelacion.textContent = c.comentarios;
+          tdAccionesCot.appendChild(pMotivoCancelacion);
+        }
+      } else {
+        if (c.estado === "Enviado" || c.estado === "Respondido incompleto") {
+          var btnCancelarCot = document.createElement("button");
+          btnCancelarCot.className = "btn-cancelar-cot";
+          btnCancelarCot.textContent = "Cancelar";
+          btnCancelarCot.onclick = (function(cot, boton) {
+            return function() {
+              var motivo = prompt("Motivo de la cancelacion (obligatorio):", "");
+              if (motivo === null) return;
+              motivo = motivo.trim();
+              if (!motivo) { alert("Debes escribir un motivo para cancelar."); return; }
+              boton.disabled = true;
+              boton.textContent = "...";
+              google.script.run
+                .withSuccessHandler(function(resultado) {
+                  cot.estado = "Cancelado";
+                  cot.comentarios = (resultado && resultado.comentarios) ? resultado.comentarios : ("Cancelado: " + motivo);
+                  abrirComparativa(d);
+                })
+                .withFailureHandler(function(err) {
+                  boton.disabled = false;
+                  boton.textContent = "Cancelar";
+                  alert("No se pudo cancelar: " + (err && err.message ? err.message : err));
+                })
+                .cancelarRFQ(cot.rfqId, motivo);
+            };
+          })(c, btnCancelarCot);
+          tdAccionesCot.appendChild(btnCancelarCot);
+        }
 
-      var btnCargarPrecio = document.createElement("button");
-      btnCargarPrecio.className = "btn-cargar-precio";
-      btnCargarPrecio.textContent = "Cargar precio";
-      btnCargarPrecio.title = "Proximamente: cargar el precio directo en DMT";
-      btnCargarPrecio.onclick = function() {
-        alert("Esta funcion todavia no hace nada: se va a conectar con DMT proximamente.");
-      };
-      tdAccionesCot.appendChild(btnCargarPrecio);
+        var btnCargarPrecio = document.createElement("button");
+        btnCargarPrecio.className = "btn-cargar-precio";
+        btnCargarPrecio.textContent = "Cargar precio";
+        btnCargarPrecio.title = "Proximamente: cargar el precio directo en DMT";
+        btnCargarPrecio.onclick = function() {
+          alert("Esta funcion todavia no hace nada: se va a conectar con DMT proximamente.");
+        };
+        tdAccionesCot.appendChild(btnCargarPrecio);
+      }
 
       tr.appendChild(tdAccionesCot);
 
@@ -874,25 +884,29 @@
   // "rojo" (dudas), "verde" (OK). El criterio de "rojo" todavia no esta
   // definido -- lo ajustamos cuando decidan que senal lo dispara.
   function estadoEtapaCotizacion(d) {
-    var cot = d.cotizaciones || [];
+    var todas = d.cotizaciones || [];
+    if (todas.length === 0) return "gris"; // nunca se mando ningun RFQ
 
-    // Rojo: el proveedor respondio pero sin el excel adjunto, o el excel
-    // no traia la informacion necesaria (precio/moneda/etc).
-    var hayIncompleto = cot.some(function(c) { return c.estado === "Respondido incompleto"; });
+    // Las cotizaciones canceladas no cuentan para decidir el color: si se
+    // cancela la unica que tenia precio o estaba incompleta, el pill vuelve
+    // a azul (esperando) en vez de quedarse naranja/rojo con datos viejos.
+    var activas = todas.filter(function(c) { return c.estado !== "Cancelado"; });
+
+    // Rojo: algun proveedor activo respondio pero sin el excel adjunto, o
+    // el excel no traia la informacion necesaria (precio/moneda/etc).
+    var hayIncompleto = activas.some(function(c) { return c.estado === "Respondido incompleto"; });
     if (hayIncompleto) return "rojo";
 
-    // Naranja: ya se recibio el precio de al menos un proveedor.
-    var hayConPrecio = cot.some(function(c) {
+    // Naranja: ya se recibio el precio de al menos un proveedor activo.
+    var hayConPrecio = activas.some(function(c) {
       var p = Number(c.precio);
       return c.precio !== "" && c.precio !== null && c.precio !== undefined && !isNaN(p);
     });
     if (hayConPrecio) return "naranja";
 
-    // Azul: se mando el RFQ y esta esperando respuesta.
-    var hayEnviado = cot.some(function(c) { return c.estado === "Enviado" || c.estado === "Pendiente"; });
-    if (hayEnviado) return "azul";
-
-    return "gris";
+    // Azul: ya se mando algun RFQ y no hay ninguna respuesta activa
+    // todavia (o la que habia se cancelo).
+    return "azul";
   }
   function estadoEtapaMuestras(d) {
     // Sin color propio por ahora: solo la pastilla "RFQ" usa colores.

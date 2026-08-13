@@ -787,7 +787,7 @@
     background: var(--card);
     border: 1px solid var(--card-border);
     border-radius: 12px;
-    max-width: 900px;
+    max-width: 1200px;
     width: 100%;
     max-height: 85vh;
     overflow-y: auto;
@@ -809,8 +809,8 @@
   }
   .modal-cerrar:hover { color: var(--text); }
 
-  .tabla-comp-wrap { overflow-x: auto; margin-top: 16px; }
-  .tabla-comp { width: 100%; border-collapse: collapse; font-size: 12.5px; min-width: 700px; }
+  .tabla-comp-wrap { margin-top: 16px; }
+  .tabla-comp { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 12.5px; }
   .tabla-comp th {
     text-align: left;
     font-family: 'Inter', sans-serif;
@@ -822,7 +822,7 @@
     padding: 9px 10px;
     border-bottom: 1px solid var(--card-border);
   }
-  .tabla-comp td { padding: 10px; border-bottom: 1px solid var(--card-border); }
+  .tabla-comp td { padding: 10px; border-bottom: 1px solid var(--card-border); word-break: break-word; overflow-wrap: break-word; }
   .tabla-comp tr.mejor-precio td { background: var(--green-soft); }
   .tabla-comp tr.mejor-precio td:first-child { border-left: 3px solid var(--green); }
   .tabla-comp .precio-cell { font-family: 'Inter', sans-serif; font-weight: 700; }
