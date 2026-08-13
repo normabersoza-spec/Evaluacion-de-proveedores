@@ -91,6 +91,52 @@ function notificarAsignacionNueva(sheet, filaNueva) {
   }
 }
 
+// Lee la hoja "Proveedores" y arma un mapa { PREFIJO: "NombreResponsable" }
+// a partir de la columna A (Nomenclatura, ej. "100") y la columna E
+// (Responsable). Ese mismo tab se usa para dar de alta proveedores, pero
+// las filas que solo sirven para esta asignacion por prefijo pueden dejar
+// vacias las demas columnas (Name, Commodity, etc.).
+function obtenerMapaPrefijosSourcing() {
+  var mapa = {};
+  var ss = SpreadsheetApp.openByUrl(SHEET_URL);
+  var hoja = ss.getSheetByName("Proveedores");
+  if (!hoja) return mapa;
+
+  var datos = hoja.getDataRange().getValues();
+  for (var i = 1; i < datos.length; i++) {
+    var prefijo = String(datos[i][0] || "").trim().toUpperCase(); // col A: Nomenclatura
+    var responsable = String(datos[i][4] || "").trim();           // col E: Responsable
+    if (!prefijo || !responsable) continue;
+    mapa[prefijo] = responsable;
+  }
+  return mapa;
+}
+
+// Al llegar una tarea nueva, toma los primeros 3 caracteres del codigo de
+// pieza (columna E de la hoja principal) y busca a que persona de Sourcing
+// le corresponde ese prefijo segun la hoja "Proveedores". Si el prefijo no
+// esta dado de alta o la tarea ya trae Sourcing asignado, no hace nada.
+function asignarSourcingPorPrefijo(sheet, filaNueva) {
+  var sourcingActual = sheet.getRange(filaNueva, 13).getValue(); // col M
+  if (sourcingActual) return; // ya tiene alguien asignado, no se pisa
+
+  var codigo = sheet.getRange(filaNueva, 5).getValue(); // col E
+  if (!codigo) return;
+
+  var prefijo = String(codigo).trim().toUpperCase().substring(0, 3);
+  if (!prefijo) return;
+
+  var mapa = obtenerMapaPrefijosSourcing();
+  var responsable = mapa[prefijo];
+  if (!responsable) {
+    Logger.log("asignarSourcingPorPrefijo: prefijo '" + prefijo + "' (codigo " + codigo + ") no esta dado de alta en Proveedores.");
+    return;
+  }
+
+  sheet.getRange(filaNueva, 13).setValue(responsable);
+  Logger.log("Fila " + filaNueva + " (codigo " + codigo + ", prefijo " + prefijo + ") asignada automaticamente a " + responsable + ".");
+}
+
 function notificarError(origen, detalle) {
   try {
     var asunto = "⚠️ Error en automatizacion RFQ: " + origen;
@@ -127,6 +173,14 @@ function doPost(e) {
     } catch (err) {
       Logger.log("Error al intentar cancelar revisiones anteriores: " + err.message);
       notificarError("doPost - cancelarRevisionesAnteriores", err.message + "\n\n" + (err.stack || ""));
+    }
+
+    try {
+      asignarSourcingPorPrefijo(sheet, filaNueva);
+      notificarAsignacionNueva(sheet, filaNueva);
+    } catch (err) {
+      Logger.log("Error al asignar/notificar sourcing por prefijo: " + err.message);
+      notificarError("doPost - asignarSourcingPorPrefijo", err.message + "\n\n" + (err.stack || ""));
     }
 
     return ContentService.createTextOutput(JSON.stringify({status: 'ok'})).setMimeType(ContentService.MimeType.JSON);
@@ -940,6 +994,13 @@ function registrarNP(fecha, nombreArchivo, iniciador) {
   } catch (err) {
     Logger.log("Error al intentar cancelar revisiones anteriores: " + err.message);
     notificarError("registrarNP - cancelarRevisionesAnteriores", err.message + "\n\n" + (err.stack || ""));
+  }
+
+  try {
+    asignarSourcingPorPrefijo(sheet, filaNueva);
+  } catch (err) {
+    Logger.log("Error al asignar sourcing por prefijo: " + err.message);
+    notificarError("registrarNP - asignarSourcingPorPrefijo", err.message + "\n\n" + (err.stack || ""));
   }
 
   try {
