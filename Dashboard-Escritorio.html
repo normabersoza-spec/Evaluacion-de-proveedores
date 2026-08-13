@@ -735,7 +735,8 @@
       if (idx === indiceMejor) tr.className = "mejor-precio";
 
       var tdProv = document.createElement("td");
-      tdProv.textContent = (c.proveedor || c.correo || "") + (c.contacto ? " (" + c.contacto + ")" : "");
+      var nombreProveedor = (c.proveedor && c.proveedor !== "Otro (manual)") ? c.proveedor : (c.correo || "");
+      tdProv.textContent = nombreProveedor + (c.contacto ? " (" + c.contacto + ")" : "");
       tr.appendChild(tdProv);
 
       var tdEstado = document.createElement("td");
@@ -894,7 +895,8 @@
     return "gris";
   }
   function estadoEtapaMuestras(d) {
-    return d.muestras ? "verde" : "gris";
+    // Sin color propio por ahora: solo la pastilla "RFQ" usa colores.
+    return "gris";
   }
   function estadoEtapaFAI(d) {
     // TODO: no existe todavia un campo de FAI en la hoja; queda siempre gris.
@@ -905,7 +907,8 @@
     return "gris";
   }
   function estadoEtapaCaptura(d) {
-    return esAbierta(d.estado) ? "gris" : "verde";
+    // Sin color propio por ahora: solo la pastilla "RFQ" usa colores.
+    return "gris";
   }
   function crearMiniGantt(d) {
   var etapas = [
@@ -913,7 +916,7 @@
   { nombre: "Muestras", estado: estadoEtapaMuestras(d) },
   { nombre: "FAI", estado: estadoEtapaFAI(d) },
   { nombre: "3F", estado: estadoEtapa3F(d) },
-  { nombre: "CDC", estado: estadoEtapaCaptura(d) }
+  { nombre: "Datos", estado: estadoEtapaCaptura(d) }
   ];
     var cont = document.createElement("div");
     cont.className = "mini-gantt";
