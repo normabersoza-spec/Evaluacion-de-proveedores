@@ -766,13 +766,26 @@ function revisarRespuestasRFQInterno(erroresDetectados) {
       for (var a = 0; a < adjuntos.length; a++) {
         if (/\.xlsx$/i.test(adjuntos[a].getName())) { adjuntoExcel = adjuntos[a]; break; }
       }
-      if (!adjuntoExcel) { Logger.log("  -> Ninguno de los adjuntos termina en .xlsx. Se ignora."); return; }
+      var filaLog = infoPendiente.fila;
+
+      // El proveedor respondio (coincide ID + remitente) pero no mando
+      // ningun .xlsx: se marca como incompleto en vez de dejarlo revisando
+      // el mismo correo para siempre.
+      if (!adjuntoExcel) {
+        Logger.log("  -> Ninguno de los adjuntos termina en .xlsx. Se marca como 'Respondido incompleto'.");
+        hojaLog.getRange(filaLog, 10).setValue("Respondido incompleto");
+        hojaLog.getRange(filaLog, 11).setValue(new Date());
+        yaEtiquetadoEsteHilo = true;
+        return;
+      }
 
       try {
         var datos = leerDatosDeExcelAdjunto(adjuntoExcel);
         Logger.log("  -> Datos leidos del Excel: " + JSON.stringify(datos));
-        var filaLog = infoPendiente.fila;
-        hojaLog.getRange(filaLog, 10).setValue("Respondido");
+        // Si el excel llego pero sin precio, tambien es una respuesta
+        // incompleta (falta la informacion que se necesita).
+        var estadoFinal = datos.precio ? "Respondido" : "Respondido incompleto";
+        hojaLog.getRange(filaLog, 10).setValue(estadoFinal);
         hojaLog.getRange(filaLog, 11).setValue(new Date());
         hojaLog.getRange(filaLog, 12).setValue(datos.precio);
         hojaLog.getRange(filaLog, 13).setValue(datos.moneda);
@@ -780,7 +793,7 @@ function revisarRespuestasRFQInterno(erroresDetectados) {
         hojaLog.getRange(filaLog, 15).setValue(datos.entrega);
         hojaLog.getRange(filaLog, 16).setValue(datos.comentarios);
         yaEtiquetadoEsteHilo = true;
-        Logger.log("  -> Fila " + filaLog + " del Log RFQ actualizada con exito.");
+        Logger.log("  -> Fila " + filaLog + " del Log RFQ actualizada con exito (" + estadoFinal + ").");
       } catch (err) {
         Logger.log("  -> ERROR al leer o guardar el adjunto: " + err.message);
         erroresDetectados.push("RFQ " + rfqId + " (correo " + correoEsperado + "): " + err.message);

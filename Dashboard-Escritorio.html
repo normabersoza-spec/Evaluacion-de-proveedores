@@ -874,12 +874,23 @@
   // definido -- lo ajustamos cuando decidan que senal lo dispara.
   function estadoEtapaCotizacion(d) {
     var cot = d.cotizaciones || [];
-    var tieneRespuesta = cot.some(function(c) {
+
+    // Rojo: el proveedor respondio pero sin el excel adjunto, o el excel
+    // no traia la informacion necesaria (precio/moneda/etc).
+    var hayIncompleto = cot.some(function(c) { return c.estado === "Respondido incompleto"; });
+    if (hayIncompleto) return "rojo";
+
+    // Naranja: ya se recibio el precio de al menos un proveedor.
+    var hayConPrecio = cot.some(function(c) {
       var p = Number(c.precio);
       return c.precio !== "" && c.precio !== null && c.precio !== undefined && !isNaN(p);
     });
-    if (tieneRespuesta) return "verde";
-    if (String(d.estado || "").trim().toLowerCase() === "enviado" || cot.length > 0) return "naranja";
+    if (hayConPrecio) return "naranja";
+
+    // Azul: se mando el RFQ y esta esperando respuesta.
+    var hayEnviado = cot.some(function(c) { return c.estado === "Enviado" || c.estado === "Pendiente"; });
+    if (hayEnviado) return "azul";
+
     return "gris";
   }
   function estadoEtapaMuestras(d) {
