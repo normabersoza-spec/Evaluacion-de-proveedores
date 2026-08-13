@@ -133,9 +133,18 @@ function obtenerMapaPrefijosSourcing() {
 // pieza (columna E de la hoja principal) y busca a que persona de Sourcing
 // le corresponde ese prefijo segun la hoja "Proveedores". Si el prefijo no
 // esta dado de alta o la tarea ya trae Sourcing asignado, no hace nada.
+// Mismo criterio que esSourcingSinAsignar() del frontend: la columna M
+// puede traer una formula que devuelve texto de error (#N/A, etc.) cuando
+// no encuentra a nadie, y eso NO cuenta como "ya asignado".
+function esSourcingSinAsignar_(valor) {
+  if (!valor) return true;
+  var v = String(valor).trim().toUpperCase();
+  return v === "#N/A" || v === "#N/D" || v === "N/A" || v === "#REF!" || v === "#ERROR!";
+}
+
 function asignarSourcingPorPrefijo(sheet, filaNueva) {
   var sourcingActual = sheet.getRange(filaNueva, 13).getValue(); // col M
-  if (sourcingActual) return; // ya tiene alguien asignado, no se pisa
+  if (!esSourcingSinAsignar_(sourcingActual)) return; // ya tiene alguien real asignado, no se pisa
 
   var codigo = sheet.getRange(filaNueva, 5).getValue(); // col E
   if (!codigo) return;
@@ -811,6 +820,12 @@ function revisarRespuestasRFQInterno(erroresDetectados) {
   });
 }
 
+// Corrige filas viejas que quedaron en Estado = "Respondido" sin precio
+// (de antes de que existiera el estado "Respondido incompleto"). Las pasa
+// a "Respondido incompleto" en vez de revertirlas a "Enviado", porque el
+// proveedor ya contesto (aunque incompleto) y el correo ya quedo
+// etiquetado como procesado en Gmail -- revertir a "Enviado" solo
+// causaria que se le sigan mandando recordatorios de mas.
 function revisarRespondidosSospechosos(soloSimular) {
   if (soloSimular === undefined) soloSimular = true;
   var hojaLog = obtenerHojaLogRFQ();
@@ -822,24 +837,22 @@ function revisarRespondidosSospechosos(soloSimular) {
     var estado = fila[9];
     if (estado !== "Respondido") continue;
 
-    var precio = fila[11], moneda = fila[12], moq = fila[13], entrega = fila[14], comentarios = fila[15];
-    var todoVacio = !precio && !moneda && !moq && !entrega && !comentarios;
-    if (!todoVacio) continue;
+    var precio = fila[11];
+    if (precio) continue; // ya tiene precio, no es sospechoso
 
     sospechosos.push({ fila: i + 1, rfqId: fila[0], codigo: fila[2], revision: fila[3], correo: fila[7] });
   }
 
-  Logger.log("Encontrados " + sospechosos.length + " RFQ's marcados 'Respondido' con TODOS los campos vacios:");
+  Logger.log("Encontrados " + sospechosos.length + " RFQ's marcados 'Respondido' sin precio:");
   sospechosos.forEach(function(s) {
     Logger.log("  Fila " + s.fila + " | " + s.rfqId + " | " + s.codigo + " Rev." + s.revision + " | " + s.correo);
   });
 
   if (!soloSimular) {
     sospechosos.forEach(function(s) {
-      hojaLog.getRange(s.fila, 10).setValue("Enviado");
-      hojaLog.getRange(s.fila, 11).setValue("");
+      hojaLog.getRange(s.fila, 10).setValue("Respondido incompleto");
     });
-    Logger.log(sospechosos.length + " filas revertidas a 'Enviado'.");
+    Logger.log(sospechosos.length + " filas corregidas a 'Respondido incompleto'.");
   } else {
     Logger.log("Modo simulacion: no se modifico nada.");
   }

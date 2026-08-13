@@ -547,9 +547,19 @@
     document.getElementById("modalRevTituloApp").textContent = ultimaDelGrupo.codigo || "";
     document.getElementById("modalRevSubApp").textContent = ultimaDelGrupo.descripcion || "";
 
+    var ordenLista = revisiones.slice().reverse(); // mas reciente primero (la vigente queda primera)
+    ordenLista.sort(function(a, b) {
+      if (a === ultimaDelGrupo) return -1;
+      if (b === ultimaDelGrupo) return 1;
+      var aCancelada = /cancela/i.test(String(a.estado || ""));
+      var bCancelada = /cancela/i.test(String(b.estado || ""));
+      if (aCancelada !== bCancelada) return aCancelada ? 1 : -1;
+      return 0;
+    });
+
     var lista = document.getElementById("revisionesListApp");
     lista.innerHTML = "";
-    revisiones.slice().reverse().forEach(function(d) {
+    ordenLista.forEach(function(d) {
       lista.appendChild(crearBloqueRevision(d, d === ultimaDelGrupo));
     });
 
@@ -821,6 +831,10 @@
 
     var cotizaciones = (d.cotizaciones || []).slice();
     cotizaciones.sort(function(a, b) {
+      var aCancelada = a.estado === "Cancelado";
+      var bCancelada = b.estado === "Cancelado";
+      if (aCancelada !== bCancelada) return aCancelada ? 1 : -1;
+
       var pa = Number(a.precio), pb = Number(b.precio);
       var aTiene = a.precio !== "" && !isNaN(pa), bTiene = b.precio !== "" && !isNaN(pb);
       if (aTiene && bTiene) return pa - pb;
