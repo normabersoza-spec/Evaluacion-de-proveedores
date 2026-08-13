@@ -16,6 +16,12 @@ var PLANTILLA_RFQ_XLSX_BASE64 = "UEsDBBQABgAIAAAAIQAWXDbDjQEAAJkFAAATAAgCW0NvbnR
 // ID del archivo PNG del logo en Drive.
 var LOGO_FILE_ID = '1Yim1270CD2TWLaKy_JR28GrL5L7CZFnR';
 
+// Version vieja: embebe la imagen como base64 dentro del HTML. Se dejo de
+// usar para el logo del Dashboard porque el archivo pesa ~2MB y, como
+// texto base64 duplicado en las dos vistas (escritorio + app), estaba
+// inflando la pagina varios MB y haciendo que fallara la carga (sobre
+// todo en celular). Se deja disponible por si se necesita en otro lado
+// (ej. un correo, donde no se puede usar una URL externa).
 function getLogoDataUri_() {
   try {
     var logoFile = DriveApp.getFileById(LOGO_FILE_ID);
@@ -25,6 +31,23 @@ function getLogoDataUri_() {
     return 'data:' + contentType + ';base64,' + base64;
   } catch (e) {
     Logger.log('getLogoDataUri_ error: ' + e.message);
+    return '';
+  }
+}
+
+// Logo del Dashboard: en vez de embeber la imagen, se sirve como una URL
+// normal de Drive (el navegador la descarga aparte, no infla el HTML).
+// Se asegura que el archivo sea visible por link para que cargue sin pedir
+// autenticacion.
+function getLogoUrl_() {
+  try {
+    var logoFile = DriveApp.getFileById(LOGO_FILE_ID);
+    if (logoFile.getSharingAccess() === DriveApp.Access.PRIVATE) {
+      logoFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    }
+    return "https://drive.google.com/thumbnail?id=" + LOGO_FILE_ID + "&sz=w400";
+  } catch (e) {
+    Logger.log('getLogoUrl_ error: ' + e.message);
     return '';
   }
 }
@@ -1275,7 +1298,7 @@ function renderDashboardSourcing() {
     }
   }
   template.proveedoresJson = JSON.stringify(proveedores);
-  template.logoUrl = getLogoDataUri_();
+  template.logoUrl = getLogoUrl_();
 
   var correoActual = Session.getActiveUser().getEmail() || "";
   var nombreActual = MAPA_SOURCING[correoActual.toLowerCase()] || "";
@@ -1308,7 +1331,7 @@ function renderVistaSolicitante(correoActual) {
 
   var template = HtmlService.createTemplateFromFile('Solicitudes');
   template.correoActualJson = JSON.stringify(correoActual);
-  template.logoUrl = getLogoDataUri_();
+  template.logoUrl = getLogoUrl_();
 
   template.esJefeDepartamentoJson = JSON.stringify(esJefeDepartamento);
   template.departamentoJson = JSON.stringify(esJefeDepartamento ? mapaJefes[correoLower] : "");
