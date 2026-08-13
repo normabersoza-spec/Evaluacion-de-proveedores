@@ -1024,21 +1024,24 @@
 
     var tdCodigo = document.createElement("td");
     tdCodigo.className = "codigo";
+    var codigoWrap = document.createElement("span");
+    codigoWrap.className = "codigo-wrap";
     var flecha = document.createElement("span");
     flecha.textContent = "▸ ";
     flecha.style.color = "var(--navy2)";
-    tdCodigo.appendChild(flecha);
-    tdCodigo.appendChild(document.createTextNode(ultima.codigo || ""));
+    codigoWrap.appendChild(flecha);
+    codigoWrap.appendChild(document.createTextNode(ultima.codigo || ""));
     var chipRev = document.createElement("span");
     chipRev.className = "rev-chip";
     chipRev.textContent = ultima.revision || "";
-    tdCodigo.appendChild(chipRev);
+    codigoWrap.appendChild(chipRev);
     if (revisiones.length > 1) {
       var chipCount = document.createElement("span");
       chipCount.className = "rev-count-chip";
       chipCount.textContent = revisiones.length + " rev.";
-      tdCodigo.appendChild(chipCount);
+      codigoWrap.appendChild(chipCount);
     }
+    tdCodigo.appendChild(codigoWrap);
     tr.appendChild(tdCodigo);
 
     var tdDesc = document.createElement("td");
