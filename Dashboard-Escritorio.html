@@ -1,0 +1,2178 @@
+<div id="vistaEscritorioRoot">
+
+
+<div class="shell">
+
+  <nav class="sidebar">
+    <div class="sidebar-logo-box">
+      <img src="<?!= logoUrl ?>" alt="Criotec" class="logo-criotec-sidebar" referrerpolicy="no-referrer">
+    </div>
+    <div class="side-nav">
+
+      <button class="side-nav-item activo" id="tabBtnTareas">
+        <span class="material-symbols-outlined">assignment</span> Tareas Team Center
+      </button>
+
+      <button class="side-nav-item" id="tabBtnTickets">
+        <span class="material-symbols-outlined">receipt_long</span> Solicitudes Sourcing
+      </button>
+
+      <button class="side-nav-item" id="tabBtnAdaptaciones">
+        <span class="material-symbols-outlined">label</span> Adaptaciones
+      </button>
+
+      <button class="side-nav-item" id="tabBtnIngenieria">
+        <span class="material-symbols-outlined">engineering</span> Ingenieria
+      </button>
+
+      <button class="side-nav-item" id="tabBtnKPIs">
+        <span class="material-symbols-outlined">analytics</span> KPI's
+      </button>
+
+    </div>
+
+    <div class="sidebar-status">
+      <div class="identidad-line" id="identidadLine" style="display:none;">
+        <span class="punto">🟢</span>
+        <span id="identidadTexto"></span>
+      </div>
+      <div class="trigger-line" id="triggerLine" style="display:none;">
+        <span id="triggerTexto"></span>
+        <button id="btnActivarTrigger" class="btn-activar-trigger">Activar recordatorios</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="main-wrap">
+    <header class="topbar">
+      <div class="brand-text">
+        <span class="titulo">Seguimiento de tareas</span>
+      </div>
+    </header>
+
+    <main class="main-content">
+
+    <div id="vistaTareas">
+
+      <div class="content-header" style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <div>
+          <h1>Tareas de Team Center</h1>
+          <p class="sub">Gestion y seguimiento de solicitudes de ingenieria a sourcing.</p>
+        </div>
+        <button id="btnAbrirProveedores" class="btn-cotizar" style="margin-right:0; white-space:nowrap;">
+          <span class="material-symbols-outlined" style="font-size:16px; vertical-align:-3px;">store</span> Agregar Proveedor
+        </button>
+      </div>
+
+      <div id="subvistaDashboard">
+        <div class="data-module">
+          <div class="toolbar">
+            <div class="search-wrap">
+              <span class="material-symbols-outlined">search</span>
+              <input type="text" id="buscador" placeholder="Buscar codigo o descripcion...">
+            </div>
+            <div class="filtros">
+              <select id="filtroSourcing"><option value="">Sourcing: Todos</option></select>
+              <select id="filtroArea"><option value="">Area: Todas</option></select>
+              <select id="filtroCommodity"><option value="">Commodity: Todos</option></select>
+              <select id="filtroEstado">
+                <option value="abiertas">Solo abiertas</option>
+                <option value="todas">Todas</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="tabla-wrap">
+            <table class="tabla-principal">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Codigo</th>
+                  <th>Descripcion</th>
+                  <th>Progreso</th>
+                  <th>Estado</th>
+                  <th>Reasignar</th>
+                  <th>Dias</th>
+                </tr>
+              </thead>
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
+
+          <div class="status-line" id="statusLine">Cargando... (click en una fila para ver sus revisiones)</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="vistaIngenieria" style="display:none;">
+
+      <div class="content-header">
+        <h1>Ingenieria</h1>
+        <p class="sub">Carga de tareas abiertas por area y por ingeniero.</p>
+      </div>
+
+      <div class="kpi-row" style="margin-bottom:14px;">
+        <div class="kpi c-amber">
+          <div class="lbl">Total Abiertas (Ingenieria)</div>
+          <div class="num" id="statIngTotal">0</div>
+        </div>
+        <div class="kpi c-red">
+          <div class="lbl">Area con Mas Carga</div>
+          <div class="num" id="statIngAreaTop" style="font-size:17px;">-</div>
+        </div>
+        <div class="kpi c-blue">
+          <div class="lbl">Ingeniero con Mas Tareas</div>
+          <div class="num" id="statIngIngenieroTop" style="font-size:17px;">-</div>
+        </div>
+        <div class="kpi c-red">
+          <div class="lbl">Mas de 21 Dias</div>
+          <div class="num" id="statIngUrgentes">0</div>
+        </div>
+      </div>
+
+      <div class="data-module" style="margin-bottom:14px;">
+        <div class="toolbar">
+          <strong style="font-size:12.5px;">Tareas abiertas por area de Ingenieria</strong>
+          <span style="font-size:11px; color:var(--text-faint); margin-left:auto;">Click en un area para verla en el Dashboard</span>
+        </div>
+        <div class="tabla-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Area</th>
+                <th>Carga</th>
+                <th>Tareas Abiertas</th>
+                <th>Dias Promedio</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyIngenieria"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="data-module">
+        <div class="toolbar">
+          <strong style="font-size:12.5px;">Tareas abiertas por ingeniero</strong>
+        </div>
+        <div class="tabla-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Ingeniero</th>
+                <th>Tareas Abiertas</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyIngenierosPersona"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="vistaKPIs" style="display:none;">
+
+      <div class="content-header">
+        <h1>KPI's</h1>
+        <p class="sub">Indicadores generales de Team Center.</p>
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi c-amber">
+          <div class="lbl">Total Abiertas</div>
+          <div class="num" id="statTotal">0</div>
+        </div>
+        <div class="kpi c-blue">
+          <div class="lbl">NPs Nuevos esta Semana</div>
+          <div class="num" id="statNuevos">0</div>
+        </div>
+        <div class="kpi c-red">
+          <div class="lbl">Mas de 21 Dias</div>
+          <div class="num" id="statUrgentes">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="vistaTickets" style="display:none;">
+
+      <div class="content-header">
+        <h1>Solicitudes a Sourcing</h1>
+        <p class="sub">Tickets levantados por otros departamentos hacia el equipo de Sourcing.</p>
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi c-amber">
+          <div class="lbl">Tickets Abiertos</div>
+          <div class="num" id="statTicketsAbiertos">0</div>
+        </div>
+        <div class="kpi c-red">
+          <div class="lbl">Prioridad Alta / Urgente</div>
+          <div class="num" id="statTicketsUrgentes">0</div>
+        </div>
+        <div class="kpi c-blue">
+          <div class="lbl">Total Solicitudes</div>
+          <div class="num" id="statTicketsTotal">0</div>
+        </div>
+      </div>
+
+      <div class="data-module">
+        <div class="toolbar">
+          <div class="search-wrap">
+            <span class="material-symbols-outlined">search</span>
+            <input type="text" id="buscadorTickets" placeholder="Buscar descripcion...">
+          </div>
+          <div class="filtros">
+            <select id="filtroDepartamento"><option value="">Departamento: Todos</option></select>
+            <select id="filtroPrioridad">
+              <option value="">Prioridad: Todas</option>
+              <option value="Baja">Baja</option>
+              <option value="Media">Media</option>
+              <option value="Alta">Alta</option>
+              <option value="Urgente">Urgente</option>
+            </select>
+            <select id="filtroEstadoTicket">
+              <option value="abiertos">Solo abiertos</option>
+              <option value="todos">Todos</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="tabla-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha Creacion</th>
+                <th>Departamento</th>
+                <th>Solicitante</th>
+                <th>Descripcion</th>
+                <th>Adjunto</th>
+                <th>Fecha Requerida</th>
+                <th>Prioridad</th>
+                <th>Asignado a</th>
+                <th>Estado</th>
+                <th>Comentarios de Sourcing</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tbodyTickets"></tbody>
+          </table>
+        </div>
+
+        <div class="status-line" id="statusLineTickets">Cargando...</div>
+      </div>
+
+    </div>
+
+    <div id="vistaAdaptaciones" style="display:none;">
+
+      <div class="content-header">
+        <h1>Adaptaciones</h1>
+        <p class="sub">Solicitudes de Ingenieria para adaptar calcamonias con un proveedor.</p>
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi c-amber">
+          <div class="lbl">Pendientes</div>
+          <div class="num" id="statAdaptacionesPendientes">0</div>
+        </div>
+        <div class="kpi c-blue">
+          <div class="lbl">Enviadas</div>
+          <div class="num" id="statAdaptacionesEnviadas">0</div>
+        </div>
+        <div class="kpi c-red">
+          <div class="lbl">Total</div>
+          <div class="num" id="statAdaptacionesTotal">0</div>
+        </div>
+      </div>
+
+      <div class="data-module">
+        <div class="toolbar">
+          <div class="search-wrap">
+            <span class="material-symbols-outlined">search</span>
+            <input type="text" id="buscadorAdaptaciones" placeholder="Buscar codigo o comentario...">
+          </div>
+          <div class="filtros">
+            <select id="filtroEstadoAdaptacion">
+              <option value="pendientes">Solo pendientes</option>
+              <option value="todas">Todas</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="tabla-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Ingeniero</th>
+                <th>Carpeta Drive</th>
+                <th>Codigos</th>
+                <th>Comentario</th>
+                <th>Estado</th>
+                <th>Proveedor</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tbodyAdaptaciones"></tbody>
+          </table>
+        </div>
+
+        <div class="status-line" id="statusLineAdaptaciones">Cargando...</div>
+      </div>
+
+    </div>
+
+    <div class="modal-overlay" id="modalProveedoresOverlay">
+      <div class="modal-box modal-box-ancho">
+        <div class="modal-header">
+          <div class="modal-header-text">
+            <h2>Agregar Proveedor</h2>
+            <p class="sub">Da de alta un proveedor nuevo para que aparezca como opcion al enviar un RFQ de un numero de parte.</p>
+          </div>
+          <button class="modal-cerrar" onclick="cerrarProveedores()">&times;</button>
+        </div>
+
+        <div class="data-module" style="margin-bottom:14px; margin-top:16px;">
+          <div class="toolbar" style="flex-direction:column; align-items:stretch; gap:12px;">
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; width:100%;">
+              <div>
+                <label style="display:block; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-faint); margin-bottom:4px;">Nomenclatura</label>
+                <input type="text" id="nuevoProvNomenclatura" placeholder="Ej. PROV-001" style="width:100%; padding:9px 12px; border:1px solid var(--card-border); border-radius:8px; font-family:'Inter', sans-serif; font-size:13px; color:var(--text); background:#fff;">
+              </div>
+              <div>
+                <label style="display:block; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-faint); margin-bottom:4px;">Supplier ID</label>
+                <input type="text" id="nuevoProvSupplierId" placeholder="ID del proveedor" style="width:100%; padding:9px 12px; border:1px solid var(--card-border); border-radius:8px; font-family:'Inter', sans-serif; font-size:13px; color:var(--text); background:#fff;">
+              </div>
+              <div>
+                <label style="display:block; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-faint); margin-bottom:4px;">Name *</label>
+                <input type="text" id="nuevoProvNombre" placeholder="Nombre del proveedor" style="width:100%; padding:9px 12px; border:1px solid var(--card-border); border-radius:8px; font-family:'Inter', sans-serif; font-size:13px; color:var(--text); background:#fff;">
+              </div>
+              <div>
+                <label style="display:block; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-faint); margin-bottom:4px;">Commodity *</label>
+                <input type="text" id="nuevoProvCommodity" list="listaCommodities" placeholder="Ej. Refrigeracion, Electrico..." style="width:100%; padding:9px 12px; border:1px solid var(--card-border); border-radius:8px; font-family:'Inter', sans-serif; font-size:13px; color:var(--text); background:#fff;">
+                <datalist id="listaCommodities"></datalist>
+              </div>
+              <div>
+                <label style="display:block; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-faint); margin-bottom:4px;">Responsable</label>
+                <input type="text" id="nuevoProvResponsable" placeholder="Responsable interno" style="width:100%; padding:9px 12px; border:1px solid var(--card-border); border-radius:8px; font-family:'Inter', sans-serif; font-size:13px; color:var(--text); background:#fff;">
+              </div>
+              <div>
+                <label style="display:block; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-faint); margin-bottom:4px;">Compras</label>
+                <input type="text" id="nuevoProvCompras" placeholder="Comprador asignado" style="width:100%; padding:9px 12px; border:1px solid var(--card-border); border-radius:8px; font-family:'Inter', sans-serif; font-size:13px; color:var(--text); background:#fff;">
+              </div>
+              <div>
+                <label style="display:block; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-faint); margin-bottom:4px;">Contacto</label>
+                <input type="text" id="nuevoProvContacto" placeholder="Nombre del contacto" style="width:100%; padding:9px 12px; border:1px solid var(--card-border); border-radius:8px; font-family:'Inter', sans-serif; font-size:13px; color:var(--text); background:#fff;">
+              </div>
+              <div>
+                <label style="display:block; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-faint); margin-bottom:4px;">Correo contacto *</label>
+                <input type="text" id="nuevoProvCorreo" placeholder="correo@proveedor.com" style="width:100%; padding:9px 12px; border:1px solid var(--card-border); border-radius:8px; font-family:'Inter', sans-serif; font-size:13px; color:var(--text); background:#fff;">
+              </div>
+            </div>
+            <div>
+              <button id="btnAgregarProveedor" class="btn-cotizar" style="margin-right:0;">Agregar proveedor</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="data-module">
+          <div class="toolbar">
+            <div class="search-wrap">
+              <span class="material-symbols-outlined">search</span>
+              <input type="text" id="buscadorProveedores" placeholder="Buscar por nomenclatura, ID, nombre, commodity, responsable, compras o contacto...">
+            </div>
+          </div>
+
+          <div class="tabla-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nomenclatura</th>
+                  <th>Supplier ID</th>
+                  <th>Name</th>
+                  <th>Commodity</th>
+                  <th>Responsable</th>
+                  <th>Compras</th>
+                  <th>Contacto</th>
+                  <th>Correo contacto</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyProveedores"></tbody>
+            </table>
+          </div>
+
+          <div class="status-line" id="statusLineProveedores">Cargando...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="modalRevisionesOverlay">
+      <div class="modal-box modal-box-ancho">
+        <div class="modal-header">
+          <div class="modal-header-text">
+            <h2 id="modalRevTitulo">Revisiones</h2>
+            <p class="sub" id="modalRevSub"></p>
+          </div>
+          <button class="modal-cerrar" onclick="cerrarRevisiones()">&times;</button>
+        </div>
+        <div class="tabla-wrap" style="margin-top:16px;">
+          <table class="tabla-principal">
+            <thead>
+              <tr>
+                <th>Revision</th>
+                <th>Fecha</th>
+                <th>Muestras</th>
+                <th>Proveedor(es)</th>
+                <th>EAU</th>
+                <th>Cotizaciones</th>
+                <th>Dibujo</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tbodyRevisiones"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal-box">
+        <div class="modal-header">
+          <div class="modal-header-text">
+            <h2 id="modalTitulo">Comparativa de Cotizaciones</h2>
+            <p class="sub" id="modalSub"></p>
+          </div>
+          <button class="modal-cerrar" onclick="cerrarComparativa()">&times;</button>
+        </div>
+        <div class="tabla-comp-wrap">
+          <table class="tabla-comp">
+            <thead>
+              <tr>
+                <th>Proveedor</th>
+                <th>Estado</th>
+                <th>Precio Unit.</th>
+                <th>MOQ</th>
+                <th>Tiempo Entrega</th>
+                <th>Comentarios</th>
+                <th>Fecha Respuesta</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyComparativa"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+  </div>
+
+</div>
+
+
+<script>
+
+  var datosCompletos = <?!= datosJson ?>;
+
+  function normalizarCodigo(c) { return String(c || "").trim().toUpperCase(); }
+
+  function agruparPorCodigo(lista) {
+    var mapa = {};
+    var orden = [];
+    lista.forEach(function(d) {
+      var key = normalizarCodigo(d.codigo);
+      if (!mapa[key]) { mapa[key] = []; orden.push(key); }
+      mapa[key].push(d);
+    });
+    orden.forEach(function(key) { mapa[key].sort(function(a,b){ return new Date(a.fecha) - new Date(b.fecha); }); });
+    return { mapa: mapa, orden: orden };
+  }
+  var proveedoresCompletos = <?!= proveedoresJson ?>;
+  var proveedoresRecienAgregados = []; // solo los que se agregan en esta sesion, para la tabla de "Agregar Proveedor"
+  var correoActual = <?!= correoActualJson ?>;
+  var nombreActual = <?!= nombreActualJson ?>;
+  var esJefe = <?!= esJefeJson ?>;
+  var estadoAutomatizaciones = <?!= estadoAutomatizacionesJson ?>;
+  var correoResponsableNA = <?!= correoResponsableNAJson ?>;
+  var datosTickets = <?!= ticketsJson ?>;
+  var datosAdaptaciones = <?!= adaptacionesJson ?>;
+  var proveedoresCalcas = <?!= proveedoresCalcasJson ?>;
+
+  function formatearFecha(valor) {
+    if (!valor) return "";
+    var d = new Date(valor);
+    if (isNaN(d.getTime())) return String(valor);
+    return d.toLocaleDateString("es-MX", { day: "2-digit", month: "short" });
+  }
+
+  function diasAbierta(valor) {
+    if (!valor) return 0;
+    var d = new Date(valor);
+    if (isNaN(d.getTime())) return 0;
+    return Math.floor((Date.now() - d.getTime()) / 86400000);
+  }
+
+  function nivelUrgencia(dias) {
+    if (dias > 21) return "overdue";
+    if (dias >= 7) return "warn";
+    return "fresh";
+  }
+
+  function dentroDeUltimaSemana(valor) {
+    return diasAbierta(valor) <= 7;
+  }
+
+  function esAbierta(estado) {
+    if (!estado) return true;
+    var e = String(estado).trim().toLowerCase();
+    if (e.indexOf("cancela") !== -1) return true; // las canceladas cuentan como "abiertas" en este filtro
+    return (e !== "cerrada" && e !== "cerrado" && e !== "completada" && e !== "completado");
+  }
+
+  function esSourcingSinAsignar(valor) {
+    if (!valor) return true;
+    var v = String(valor).trim().toUpperCase();
+    return v === "#N/A" || v === "#N/D" || v === "N/A" || v === "#REF!" || v === "#ERROR!";
+  }
+
+  function esUsuarioResponsableDeNA() {
+    return !!correoActual && correoActual.toLowerCase() === correoResponsableNA.toLowerCase();
+  }
+
+  function llenarSelect(id, valores) {
+    var sel = document.getElementById(id);
+    var actual = sel.value;
+    var primerOpcion = sel.options[0];
+    sel.innerHTML = "";
+    sel.appendChild(primerOpcion);
+    var unicos = Array.from(new Set(valores.filter(function(v){ return v && String(v).trim(); })));
+    unicos.sort(function(a,b){ return String(a).localeCompare(String(b), "es"); });
+    unicos.forEach(function(v) {
+      var opt = document.createElement("option");
+      opt.value = v;
+      opt.textContent = v;
+      sel.appendChild(opt);
+    });
+    sel.value = actual;
+  }
+
+  function enviarTarea(filaIndex, codigo, revision, descripcion, muestras, eau, contenedorProveedores, btn) {
+    var opciones = contenedorProveedores._opciones || [];
+    var seleccionados = Array.from(contenedorProveedores.querySelectorAll('input[type="checkbox"]:checked'))
+      .map(function(chk) {
+        var encontrado = opciones.find(function(p) { return p.correo === chk.value; });
+        return {
+          correo: chk.value,
+          proveedor: encontrado ? encontrado.proveedor : "",
+          contacto: encontrado ? encontrado.contacto : ""
+        };
+      });
+
+    var inputOtro = contenedorProveedores.querySelector(".prov-otro");
+    var otroCorreo = inputOtro ? inputOtro.value.trim() : "";
+    if (otroCorreo) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(otroCorreo)) {
+        alert("El correo adicional no se ve valido: " + otroCorreo);
+        return;
+      }
+      seleccionados.push({ correo: otroCorreo, proveedor: "Otro (manual)", contacto: "" });
+    }
+
+    if (seleccionados.length === 0) {
+      alert("Selecciona al menos un proveedor (o escribe un correo) antes de enviar el RFQ.");
+      return;
+    }
+
+    var correosTexto = seleccionados.map(function(p) { return p.correo; }).join(", ");
+    var confirmar = confirm("Se va a enviar un correo individual a cada uno de:\n" + correosTexto + "\n\n¿Confirmas?");
+    if (!confirmar) return;
+
+    btn.disabled = true;
+    var textoOriginal = btn.textContent;
+    btn.textContent = "Enviando...";
+    google.script.run
+      .withSuccessHandler(function(resultado) {
+        btn.disabled = false;
+        btn.textContent = textoOriginal;
+        var item = null;
+        for (var i = 0; i < datosCompletos.length; i++) {
+          if (datosCompletos[i].fila === filaIndex) { item = datosCompletos[i]; break; }
+        }
+        if (item) {
+          item.estado = "Enviado";
+          if (!item.cotizaciones) item.cotizaciones = [];
+          seleccionados.forEach(function(p) {
+            var yaExiste = item.cotizaciones.some(function(c) { return c.correo === p.correo; });
+            if (yaExiste) return;
+            item.cotizaciones.push({
+              correo: p.correo,
+              proveedor: p.proveedor,
+              contacto: p.contacto,
+              estado: "Pendiente",
+              precio: "",
+              moneda: "",
+              moq: "",
+              entrega: "",
+              comentarios: "",
+              fechaRespuesta: "",
+              rfqId: null
+            });
+          });
+        }
+        renderizar();
+        if (resultado && resultado.encontrado) {
+          alert("Correo(s) enviado(s) a: " + resultado.enviadoA.join(", ") + "\n(con dibujo y RFQ adjuntos, registrado en 'Log RFQ')");
+        } else {
+          alert("Correo(s) enviado(s) a: " + (resultado ? resultado.enviadoA.join(", ") : "") +
+                "\n\nOJO: no se encontro el dibujo en Drive, se mando solo con el Excel.\nSe busco: " + (resultado ? resultado.nombreBuscado : "?"));
+        }
+      })
+      .withFailureHandler(function(err) {
+        btn.disabled = false;
+        btn.textContent = textoOriginal;
+        alert("No se pudo enviar el correo: " + (err && err.message ? err.message : err));
+      })
+      .enviarCotizacion(filaIndex, codigo, revision, descripcion, muestras, seleccionados, eau);
+  }
+
+  function guardarReasignacion(fila, dato, nuevo, sel) {
+    sel.disabled = true;
+    google.script.run
+      .withSuccessHandler(function() {
+        dato.sourcing = nuevo;
+        sel.disabled = false;
+        renderizar();
+      })
+      .withFailureHandler(function(err) {
+        sel.disabled = false;
+        sel.value = "";
+        alert("No se pudo reasignar: " + (err && err.message ? err.message : err));
+      })
+      .reasignarTarea(fila, nuevo);
+  }
+
+  function cerrarTarea(filaIndex, btn) {
+    btn.disabled = true;
+    btn.textContent = "...";
+    google.script.run
+      .withSuccessHandler(function() {
+        var item = null;
+        for (var i = 0; i < datosCompletos.length; i++) {
+          if (datosCompletos[i].fila === filaIndex) { item = datosCompletos[i]; break; }
+        }
+        if (item) item.estado = "Cerrada";
+        renderizar();
+      })
+      .withFailureHandler(function(err) {
+        alert("No se pudo cerrar la tarea: " + (err && err.message ? err.message : err));
+        btn.disabled = false;
+        btn.textContent = "Cerrar";
+      })
+      .marcarCerrada(filaIndex);
+  }
+
+  function formatearMoneda(precio, moneda) {
+    if (precio === "" || precio === null || precio === undefined) return null;
+    var num = Number(precio);
+    if (isNaN(num)) return String(precio);
+    return num.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 4 }) + " " + (moneda || "");
+  }
+
+  function abrirComparativa(d) {
+    document.getElementById("modalTitulo").textContent = "Comparativa: " + d.codigo + " Rev." + d.revision;
+    document.getElementById("modalSub").textContent = d.descripcion || "";
+
+    var cotizaciones = (d.cotizaciones || []).slice();
+
+    cotizaciones.sort(function(a, b) {
+      var pa = Number(a.precio), pb = Number(b.precio);
+      var aTiene = a.precio !== "" && !isNaN(pa);
+      var bTiene = b.precio !== "" && !isNaN(pb);
+      if (aTiene && bTiene) return pa - pb;
+      if (aTiene) return -1;
+      if (bTiene) return 1;
+      return 0;
+    });
+
+    var indiceMejor = -1;
+    for (var i = 0; i < cotizaciones.length; i++) {
+      var p = Number(cotizaciones[i].precio);
+      if (cotizaciones[i].precio !== "" && !isNaN(p)) { indiceMejor = i; break; }
+    }
+
+    var tbody = document.getElementById("tbodyComparativa");
+    tbody.innerHTML = "";
+
+    cotizaciones.forEach(function(c, idx) {
+      var tr = document.createElement("tr");
+      if (idx === indiceMejor) tr.className = "mejor-precio";
+
+      var tdProv = document.createElement("td");
+      tdProv.textContent = (c.proveedor || c.correo || "") + (c.contacto ? " (" + c.contacto + ")" : "");
+      tr.appendChild(tdProv);
+
+      var tdEstado = document.createElement("td");
+      tdEstado.textContent = c.estado || "";
+      tr.appendChild(tdEstado);
+
+      var tdPrecio = document.createElement("td");
+      var precioFmt = formatearMoneda(c.precio, c.moneda);
+      if (precioFmt) {
+        tdPrecio.className = "precio-cell";
+        tdPrecio.textContent = precioFmt;
+      } else {
+        tdPrecio.innerHTML = '<span class="pendiente">Pendiente</span>';
+      }
+      tr.appendChild(tdPrecio);
+
+      var tdMoq = document.createElement("td");
+      tdMoq.textContent = c.moq || "-";
+      tr.appendChild(tdMoq);
+
+      var tdEntrega = document.createElement("td");
+      tdEntrega.textContent = c.entrega || "-";
+      tr.appendChild(tdEntrega);
+
+      var tdComentarios = document.createElement("td");
+      tdComentarios.textContent = c.comentarios || "-";
+      tr.appendChild(tdComentarios);
+
+      var tdFechaResp = document.createElement("td");
+      tdFechaResp.textContent = formatearFecha(c.fechaRespuesta) || "-";
+      tr.appendChild(tdFechaResp);
+
+      var tdAccionesCot = document.createElement("td");
+      if (c.estado === "Enviado") {
+        var btnCancelarCot = document.createElement("button");
+        btnCancelarCot.className = "btn-cancelar-cot";
+        btnCancelarCot.textContent = "Cancelar";
+        btnCancelarCot.onclick = (function(cot, boton) {
+          return function() {
+            var confirmar = confirm(
+              "Esto detiene los recordatorios automaticos para " + (cot.proveedor || cot.correo) + ".\n¿Confirmas?"
+            );
+            if (!confirmar) return;
+            boton.disabled = true;
+            boton.textContent = "...";
+            google.script.run
+              .withSuccessHandler(function() {
+                cot.estado = "Cancelado";
+                abrirComparativa(d);
+              })
+              .withFailureHandler(function(err) {
+                boton.disabled = false;
+                boton.textContent = "Cancelar";
+                alert("No se pudo cancelar: " + (err && err.message ? err.message : err));
+              })
+              .cancelarRFQ(cot.rfqId);
+          };
+        })(c, btnCancelarCot);
+        tdAccionesCot.appendChild(btnCancelarCot);
+      }
+
+      var btnCargarPrecio = document.createElement("button");
+      btnCargarPrecio.className = "btn-cargar-precio";
+      btnCargarPrecio.textContent = "Cargar precio";
+      btnCargarPrecio.title = "Proximamente: cargar el precio directo en DMT";
+      btnCargarPrecio.onclick = function() {
+        alert("Esta funcion todavia no hace nada: se va a conectar con DMT proximamente.");
+      };
+      tdAccionesCot.appendChild(btnCargarPrecio);
+
+      tr.appendChild(tdAccionesCot);
+
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById("modalOverlay").classList.add("abierto");
+  }
+
+  function cerrarComparativa() {
+    document.getElementById("modalOverlay").classList.remove("abierto");
+  }
+
+  function abrirRevisiones(key, revisiones) {
+    var ultimaDelGrupo = revisiones[revisiones.length - 1];
+    document.getElementById("modalRevTitulo").textContent = ultimaDelGrupo.codigo || "";
+    document.getElementById("modalRevSub").textContent = ultimaDelGrupo.descripcion || "";
+
+    var tbody = document.getElementById("tbodyRevisiones");
+    tbody.innerHTML = "";
+    revisiones.slice().reverse().forEach(function(d) {
+      tbody.appendChild(crearFilaDetalle(d, d === ultimaDelGrupo));
+    });
+
+    document.getElementById("modalRevisionesOverlay").classList.add("abierto");
+  }
+
+  function cerrarRevisiones() {
+    document.getElementById("modalRevisionesOverlay").classList.remove("abierto");
+  }
+
+  document.getElementById("modalRevisionesOverlay").addEventListener("click", function(e) {
+    if (e.target === this) cerrarRevisiones();
+  });
+  document.getElementById("modalOverlay").addEventListener("click", function(e) {
+    if (e.target === this) cerrarComparativa();
+  });
+
+  document.addEventListener("keydown", function(e) {
+    if (e.key !== "Escape") return;
+
+    const modalComparativa = document.getElementById("modalOverlay");
+    const modalRevisiones = document.getElementById("modalRevisionesOverlay");
+    const modalProveedores = document.getElementById("modalProveedoresOverlay");
+
+    if (modalComparativa && modalComparativa.classList.contains("abierto")) {
+      cerrarComparativa();
+      e.preventDefault();
+      return;
+    }
+
+    if (modalRevisiones && modalRevisiones.classList.contains("abierto")) {
+      cerrarRevisiones();
+      e.preventDefault();
+      return;
+    }
+
+    if (modalProveedores && modalProveedores.classList.contains("abierto")) {
+      cerrarProveedores();
+      e.preventDefault();
+      return;
+    }
+  });
+
+  // Estados posibles: "gris" (aun no se hace), "naranja" (pendiente),
+  // "rojo" (dudas), "verde" (OK). El criterio de "rojo" todavia no esta
+  // definido -- lo ajustamos cuando decidan que senal lo dispara.
+  function estadoEtapaCotizacion(d) {
+    var cot = d.cotizaciones || [];
+    var tieneRespuesta = cot.some(function(c) {
+      var p = Number(c.precio);
+      return c.precio !== "" && c.precio !== null && c.precio !== undefined && !isNaN(p);
+    });
+    if (tieneRespuesta) return "verde";
+    if (String(d.estado || "").trim().toLowerCase() === "enviado" || cot.length > 0) return "naranja";
+    return "gris";
+  }
+  function estadoEtapaMuestras(d) {
+    return d.muestras ? "verde" : "gris";
+  }
+  function estadoEtapaFAI(d) {
+    // TODO: no existe todavia un campo de FAI en la hoja; queda siempre gris.
+    return "gris";
+  }
+  function estadoEtapa3F(d) {
+    // TODO: no existe todavia un campo de 3F en la hoja; queda siempre gris.
+    return "gris";
+  }
+  function estadoEtapaCaptura(d) {
+    return esAbierta(d.estado) ? "gris" : "verde";
+  }
+  function crearMiniGantt(d) {
+  var etapas = [
+  { nombre: "RFQ", estado: estadoEtapaCotizacion(d) },
+  { nombre: "Muestras", estado: estadoEtapaMuestras(d) },
+  { nombre: "FAI", estado: estadoEtapaFAI(d) },
+  { nombre: "3F", estado: estadoEtapa3F(d) },
+  { nombre: "CDC", estado: estadoEtapaCaptura(d) }
+  ];
+    var cont = document.createElement("div");
+    cont.className = "mini-gantt";
+    etapas.forEach(function(et) {
+      var seg = document.createElement("div");
+      seg.className = "mini-gantt-seg " + et.estado;
+      seg.title = et.nombre + ": " + et.estado;
+      seg.appendChild(document.createTextNode(et.nombre));
+      cont.appendChild(seg);
+    });
+    return cont;
+  }
+
+  // Crea el <select> de "Reasignar" (persona de Sourcing) para una tarea/revision dada.
+  // Se reutiliza tanto en la fila principal del Dashboard como en el detalle de revisiones.
+  function crearSelectReasignar(fila, dato) {
+    var selectReasignar = document.createElement("select");
+    selectReasignar.className = "select-reasignar";
+    selectReasignar.style.marginRight = "0";
+    selectReasignar.style.maxWidth = "140px";
+    selectReasignar.onclick = function(e) { e.stopPropagation(); };
+
+    var opcionesSourcing = Array.from(new Set(
+      datosCompletos.map(function(x){ return x.sourcing; }).filter(function(v){ return v && String(v).trim(); })
+    ));
+    if (dato.sourcing && opcionesSourcing.indexOf(dato.sourcing) === -1) opcionesSourcing.push(dato.sourcing);
+    opcionesSourcing.sort(function(a,b){ return String(a).localeCompare(String(b), "es"); });
+
+    var optPlaceholder = document.createElement("option");
+    optPlaceholder.value = "";
+    optPlaceholder.textContent = "Reasignar...";
+    optPlaceholder.disabled = true;
+    optPlaceholder.selected = true;
+    selectReasignar.appendChild(optPlaceholder);
+
+    opcionesSourcing.forEach(function(nombre) {
+      var opt = document.createElement("option");
+      opt.value = nombre;
+      opt.textContent = (nombre === dato.sourcing) ? (nombre + " (actual)") : nombre;
+      selectReasignar.appendChild(opt);
+    });
+
+    var optOtro = document.createElement("option");
+    optOtro.value = "__otro__";
+    optOtro.textContent = "Otro...";
+    selectReasignar.appendChild(optOtro);
+
+    selectReasignar.onchange = (function(filaX, datoX, sel) {
+      return function() {
+        var valor = sel.value;
+        if (valor === "__otro__") {
+          sel.value = "";
+          var nuevo = prompt("Nombre de la persona de Sourcing:", "");
+          if (nuevo === null) return;
+          nuevo = nuevo.trim();
+          if (!nuevo || nuevo === datoX.sourcing) return;
+          guardarReasignacion(filaX, datoX, nuevo, sel);
+          return;
+        }
+        if (!valor || valor === datoX.sourcing) { sel.value = ""; return; }
+        guardarReasignacion(filaX, datoX, valor, sel);
+      };
+    })(fila, dato, selectReasignar);
+
+    return selectReasignar;
+  }
+
+  function crearFilaGrupo(key, revisiones) {
+    var ultima = revisiones[revisiones.length - 1];
+    var abiertasCount = revisiones.filter(function(x){ return esAbierta(x.estado); }).length;
+    var diasList = revisiones.filter(function(x){ return esAbierta(x.estado); }).map(function(x){ return diasAbierta(x.fecha); });
+    var maxDias = diasList.length ? Math.max.apply(null, diasList) : 0;
+
+    var tr = document.createElement("tr");
+    tr.className = "fila-grupo";
+    tr.title = "Click para ver las revisiones";
+    tr.onclick = function() { abrirRevisiones(key, revisiones); };
+
+    var tdFecha = document.createElement("td");
+    tdFecha.className = "fecha-cell";
+    tdFecha.textContent = formatearFecha(ultima.fecha);
+    tr.appendChild(tdFecha);
+
+    var tdCodigo = document.createElement("td");
+    tdCodigo.className = "codigo";
+    var flecha = document.createElement("span");
+    flecha.textContent = "▸ ";
+    flecha.style.color = "var(--navy2)";
+    tdCodigo.appendChild(flecha);
+    tdCodigo.appendChild(document.createTextNode(ultima.codigo || ""));
+    var chipRev = document.createElement("span");
+    chipRev.className = "rev-chip";
+    chipRev.textContent = ultima.revision || "";
+    tdCodigo.appendChild(chipRev);
+    if (revisiones.length > 1) {
+      var chipCount = document.createElement("span");
+      chipCount.className = "rev-count-chip";
+      chipCount.textContent = revisiones.length + " rev.";
+      tdCodigo.appendChild(chipCount);
+    }
+    tr.appendChild(tdCodigo);
+
+    var tdDesc = document.createElement("td");
+    tdDesc.className = "desc-cell";
+    tdDesc.textContent = ultima.descripcion || "";
+    tdDesc.title = ultima.descripcion || "";
+    tr.appendChild(tdDesc);
+
+    var tdGantt = document.createElement("td");
+    tdGantt.appendChild(crearMiniGantt(ultima));
+    tr.appendChild(tdGantt);
+
+    var tdEstado = document.createElement("td");
+    var badge = document.createElement("span");
+    badge.className = "badge-pill " + (abiertasCount > 0 ? "warn" : "fresh");
+    badge.textContent = abiertasCount > 0 ? (abiertasCount + " abierta(s)") : "Todas cerradas";
+    tdEstado.appendChild(badge);
+    tr.appendChild(tdEstado);
+
+    var tdReasignar = document.createElement("td");
+    tdReasignar.onclick = function(e) { e.stopPropagation(); };
+    tdReasignar.appendChild(crearSelectReasignar(ultima.fila, ultima));
+    tr.appendChild(tdReasignar);
+
+    var tdDias = document.createElement("td");
+    if (abiertasCount > 0) {
+      var badgeDias = document.createElement("span");
+      badgeDias.className = "badge-pill " + nivelUrgencia(maxDias);
+      badgeDias.textContent = maxDias + "d";
+      tdDias.appendChild(badgeDias);
+    }
+    tr.appendChild(tdDias);
+
+    return tr;
+  }
+
+  // Crea un chip pequeno de proveedor (checkbox oculto + etiqueta tipo boton).
+  // tituloCompleto (opcional) se usa como tooltip cuando el texto visible se trunca.
+  function crearChipProveedor(valorCorreo, etiquetaTexto, datasetNombre, tituloCompleto) {
+    var etiqueta = document.createElement("label");
+    etiqueta.className = "prov-item";
+    etiqueta.title = tituloCompleto || etiquetaTexto;
+    var chk = document.createElement("input");
+    chk.type = "checkbox";
+    chk.value = valorCorreo;
+    if (datasetNombre !== undefined) chk.dataset.nombre = datasetNombre;
+    var check = document.createElement("span");
+    check.className = "check-ico";
+    check.textContent = "✓";
+    var texto = document.createElement("span");
+    texto.className = "prov-item-texto";
+    texto.textContent = etiquetaTexto;
+    etiqueta.appendChild(chk);
+    etiqueta.appendChild(check);
+    etiqueta.appendChild(texto);
+    chk.addEventListener("change", function() {
+      etiqueta.classList.toggle("seleccionado", chk.checked);
+    });
+    return etiqueta;
+  }
+
+  function crearFilaDetalle(d, esActual) {
+    var dias = diasAbierta(d.fecha);
+    var abierta = esAbierta(d.estado);
+    var esRevisionPasada = !esActual;
+    var estaCancelada = /cancela/i.test(String(d.estado || ""));
+
+    var tr = document.createElement("tr");
+    tr.className = "fila-detalle" + (esRevisionPasada ? " revision-pasada" : "") + (estaCancelada ? " cancelada" : "");
+
+    var tdRevision = document.createElement("td");
+    tdRevision.className = "codigo";
+    var chip = document.createElement("span");
+    chip.className = "rev-chip";
+    chip.textContent = d.revision || "";
+    tdRevision.appendChild(chip);
+    tr.appendChild(tdRevision);
+
+    var tdFecha = document.createElement("td");
+    tdFecha.className = "fecha-cell";
+    tdFecha.textContent = formatearFecha(d.fecha);
+    tr.appendChild(tdFecha);
+
+    var tdMuestras = document.createElement("td");
+    var inputMuestras = document.createElement("input");
+    inputMuestras.type = "text";
+    inputMuestras.className = "input-muestras";
+    inputMuestras.value = d.muestras || "";
+    inputMuestras.placeholder = "-";
+    inputMuestras.onclick = function(e) { e.stopPropagation(); };
+    inputMuestras.onblur = (function(fila, dato, campo) {
+      return function() {
+        if (campo.value === (dato.muestras || "")) return;
+        campo.disabled = true;
+        google.script.run
+          .withSuccessHandler(function() {
+            dato.muestras = campo.value;
+            campo.disabled = false;
+            campo.style.borderColor = "";
+          })
+          .withFailureHandler(function(err) {
+            campo.disabled = false;
+            alert("No se pudo guardar: " + (err && err.message ? err.message : err));
+          })
+          .guardarMuestras(fila, campo.value);
+      };
+    })(d.fila, d, inputMuestras);
+    tdMuestras.appendChild(inputMuestras);
+    tr.appendChild(tdMuestras);
+
+    var tdProveedores = document.createElement("td");
+    var wrapProveedores = document.createElement("div");
+    wrapProveedores.className = "prov-wrap";
+    wrapProveedores.onclick = function(e) { e.stopPropagation(); };
+
+    var commodityFila = (d.commodity || "").trim().toLowerCase();
+    var opcionesProveedor = proveedoresCompletos.filter(function(p) {
+      return (p.commodity || "").trim().toLowerCase() === commodityFila;
+    });
+
+    var listaProveedores = document.createElement("div");
+    listaProveedores.className = "prov-list";
+    if (opcionesProveedor.length === 0) {
+      var msgVacio = document.createElement("div");
+      msgVacio.className = "prov-vacio";
+      msgVacio.textContent = "Sin proveedores para este commodity";
+      listaProveedores.appendChild(msgVacio);
+    } else {
+      opcionesProveedor.forEach(function(p) {
+        listaProveedores.appendChild(crearChipProveedor(p.correo, p.proveedor, undefined, p.proveedor + (p.contacto ? " — " + p.contacto : "")));
+      });
+    }
+    wrapProveedores.appendChild(listaProveedores);
+    wrapProveedores._opciones = opcionesProveedor;
+
+    var inputOtroCorreo = document.createElement("input");
+    inputOtroCorreo.type = "text";
+    inputOtroCorreo.className = "prov-otro";
+    inputOtroCorreo.placeholder = "+ otro correo";
+    wrapProveedores.appendChild(inputOtroCorreo);
+
+    tdProveedores.appendChild(wrapProveedores);
+    tr.appendChild(tdProveedores);
+
+    var tdEAU = document.createElement("td");
+    var inputEAU = document.createElement("input");
+    inputEAU.type = "text";
+    inputEAU.className = "input-eau";
+    inputEAU.placeholder = "-";
+    inputEAU.title = "Volumen Anual Estimado (se manda en el correo del RFQ)";
+    inputEAU.onclick = function(e) { e.stopPropagation(); };
+    tdEAU.appendChild(inputEAU);
+    tr.appendChild(tdEAU);
+
+    var tdCotizaciones = document.createElement("td");
+    var cotizaciones = d.cotizaciones || [];
+    var btnComparar = document.createElement("button");
+    btnComparar.className = "btn-comparar" + (cotizaciones.length === 0 ? " sin-cotizaciones" : "");
+    btnComparar.textContent = cotizaciones.length === 0 ? "Sin cotizaciones" : "Ver (" + cotizaciones.length + ")";
+    if (cotizaciones.length > 0) {
+      btnComparar.onclick = (function(dato) {
+        return function(e) { e.stopPropagation(); abrirComparativa(dato); };
+      })(d);
+    } else {
+      btnComparar.disabled = true;
+    }
+    tdCotizaciones.appendChild(btnComparar);
+    tr.appendChild(tdCotizaciones);
+
+    var tdDibujo = document.createElement("td");
+    var btnVerDibujo = document.createElement("button");
+    btnVerDibujo.className = "btn-ver-dibujo";
+    btnVerDibujo.title = "Ver dibujo de esta revision";
+    btnVerDibujo.innerHTML = '<span class="material-symbols-outlined">visibility</span>';
+    btnVerDibujo.onclick = (function(dato) {
+      return function(e) {
+        e.stopPropagation();
+        if (dato.enlaceDibujo) {
+          window.open(dato.enlaceDibujo, "_blank");
+        } else {
+          alert("No hay un link de dibujo capturado en la columna Q para " + dato.codigo + ".");
+        }
+      };
+    })(d);
+    tdDibujo.appendChild(btnVerDibujo);
+    tr.appendChild(tdDibujo);
+
+    var tdAccion = document.createElement("td");
+    tdAccion.onclick = function(e) { e.stopPropagation(); };
+
+    if (esRevisionPasada) {
+      if (abierta) {
+        var btnCancelarRevision = document.createElement("button");
+        btnCancelarRevision.className = "btn-cancelar-cot";
+        btnCancelarRevision.textContent = "Cancelar (revision anterior)";
+        btnCancelarRevision.onclick = (function(fila, dato, boton) {
+          return function() {
+            var confirmar = confirm("Esta revision ya no es la vigente para " + dato.codigo + ". ¿Cancelarla?");
+            if (!confirmar) return;
+            boton.disabled = true;
+            boton.textContent = "...";
+            google.script.run
+              .withSuccessHandler(function(resultado) {
+                dato.estado = resultado.estado;
+                renderizar();
+              })
+              .withFailureHandler(function(err) {
+                boton.disabled = false;
+                boton.textContent = "Cancelar (revision anterior)";
+                alert("No se pudo cancelar: " + (err && err.message ? err.message : err));
+              })
+              .cancelarRevisionPasada(fila, dato.codigo, dato.revision);
+          };
+        })(d.fila, d, btnCancelarRevision);
+        tdAccion.appendChild(btnCancelarRevision);
+      } else {
+        var badgeYaCancelada = document.createElement("span");
+        badgeYaCancelada.className = "badge-pill fresh";
+        badgeYaCancelada.textContent = "Revision anterior";
+        tdAccion.appendChild(badgeYaCancelada);
+      }
+      tr.appendChild(tdAccion);
+      return tr;
+    }
+
+    var wrapAccion = document.createElement("div");
+    wrapAccion.style.display = "flex";
+    wrapAccion.style.flexDirection = "column";
+    wrapAccion.style.alignItems = "flex-start";
+    wrapAccion.style.gap = "4px";
+    tdAccion.appendChild(wrapAccion);
+
+    // El selector de "Reasignar" ahora vive en la fila principal del Dashboard
+    // (columna Reasignar, justo despues de Estado) en vez de aqui.
+
+    var btnCotizar = document.createElement("button");
+    btnCotizar.className = "btn-cotizar";
+    btnCotizar.textContent = "Enviar RFQ";
+    btnCotizar.style.marginRight = "0";
+    btnCotizar.onclick = (function(fila, codigo, revision, descripcion, campoMuestras, campoEAU, contenedorProveedores, boton) {
+      return function() { enviarTarea(fila, codigo, revision, descripcion, campoMuestras.value, campoEAU.value, contenedorProveedores, boton); };
+    })(d.fila, d.codigo, d.revision, d.descripcion, inputMuestras, inputEAU, wrapProveedores, btnCotizar);
+    wrapAccion.appendChild(btnCotizar);
+
+    if (abierta) {
+      var btnCerrar = document.createElement("button");
+      btnCerrar.className = "btn-cerrar";
+      btnCerrar.textContent = "Cerrar";
+      btnCerrar.onclick = (function(fila, boton) {
+        return function() { cerrarTarea(fila, boton); };
+      })(d.fila, btnCerrar);
+      wrapAccion.appendChild(btnCerrar);
+
+      var btnCancelarTarea = document.createElement("button");
+      btnCancelarTarea.className = "btn-cancelar-tarea";
+      btnCancelarTarea.textContent = "Cancelar";
+      btnCancelarTarea.onclick = (function(fila, dato, boton) {
+        return function() { cancelarTarea(fila, dato, boton); };
+      })(d.fila, d, btnCancelarTarea);
+      wrapAccion.appendChild(btnCancelarTarea);
+    }
+    tr.appendChild(tdAccion);
+
+    return tr;
+  }
+
+  function cancelarTarea(filaIndex, dato, btn) {
+    var motivo = prompt("Motivo de la cancelacion (obligatorio):", "");
+    if (motivo === null) return;
+    motivo = motivo.trim();
+    if (!motivo) {
+      alert("Debes escribir un motivo para cancelar la tarea.");
+      return;
+    }
+    var confirmar = confirm("¿Seguro que quieres cancelar " + dato.codigo + " Rev." + dato.revision + "?");
+    if (!confirmar) return;
+
+    btn.disabled = true;
+    btn.textContent = "...";
+    google.script.run
+      .withSuccessHandler(function(resultado) {
+        dato.estado = (resultado && resultado.estado) ? resultado.estado : "Cancelada";
+        renderizar();
+      })
+      .withFailureHandler(function(err) {
+        alert("No se pudo cancelar la tarea: " + (err && err.message ? err.message : err));
+        btn.disabled = false;
+        btn.textContent = "Cancelar";
+      })
+      .cancelarTarea(filaIndex, motivo);
+  }
+
+  function renderizar() {
+    var filtro = document.getElementById("buscador").value.toLowerCase();
+    var fSourcing = document.getElementById("filtroSourcing").value;
+    var fArea = document.getElementById("filtroArea").value;
+    var fCommodity = document.getElementById("filtroCommodity").value;
+    var fEstado = document.getElementById("filtroEstado").value;
+
+    llenarSelect("filtroSourcing", datosCompletos.map(function(d){ return d.sourcing; }));
+    llenarSelect("filtroArea", datosCompletos.map(function(d){ return d.area; }));
+    llenarSelect("filtroCommodity", datosCompletos.map(function(d){ return d.commodity; }));
+
+    var filtrados = datosCompletos.filter(function(d) {
+      if (fEstado === "abiertas" && !esAbierta(d.estado)) return false;
+      if (fSourcing) {
+        var coincideSourcing = d.sourcing === fSourcing;
+        var esSuyaPorNA = esUsuarioResponsableDeNA() &&
+          fSourcing && nombreActual &&
+          fSourcing.trim().toLowerCase() === nombreActual.trim().toLowerCase() &&
+          esSourcingSinAsignar(d.sourcing);
+        if (!coincideSourcing && !esSuyaPorNA) return false;
+      }
+      if (fArea && d.area !== fArea) return false;
+      if (fCommodity && d.commodity !== fCommodity) return false;
+      if (filtro) {
+        var texto = (String(d.codigo) + " " + String(d.descripcion)).toLowerCase();
+        if (texto.indexOf(filtro) === -1) return false;
+      }
+      return true;
+    });
+
+    var grupos = agruparPorCodigo(filtrados);
+    var tbody = document.getElementById("tbody");
+    tbody.innerHTML = "";
+
+    if (grupos.orden.length === 0) {
+      var trVacio = document.createElement("tr");
+      var tdVacio = document.createElement("td");
+      tdVacio.colSpan = 7;
+      tdVacio.innerHTML = '<div class="empty-state">No hay tareas que coincidan con estos filtros.</div>';
+      trVacio.appendChild(tdVacio);
+      tbody.appendChild(trVacio);
+    } else {
+      grupos.orden.sort(function(a, b) {
+        return new Date(grupos.mapa[a][0].fecha) - new Date(grupos.mapa[b][0].fecha);
+      });
+      grupos.orden.forEach(function(key) {
+        var revisiones = grupos.mapa[key];
+        tbody.appendChild(crearFilaGrupo(key, revisiones));
+      });
+    }
+
+    var abiertasActuales = datosCompletos.filter(function(d){ return esAbierta(d.estado); });
+    document.getElementById("statTotal").textContent = abiertasActuales.length;
+    document.getElementById("statUrgentes").textContent = abiertasActuales.filter(function(d){ return diasAbierta(d.fecha) > 21; }).length;
+    document.getElementById("statNuevos").textContent = abiertasActuales.filter(function(d) {
+      return d.revision && String(d.revision).toUpperCase() === "A" && dentroDeUltimaSemana(d.fecha);
+    }).length;
+
+    document.getElementById("statusLine").textContent = filtrados.length + " de " + datosCompletos.length + " registros mostrados.";
+  }
+
+
+  // --- Pestaña de Solicitudes a Sourcing (tickets de departamentos) ---
+
+  function esTicketAbierto(estado) {
+    if (!estado) return true;
+    var e = String(estado).trim().toLowerCase();
+    return (e !== "cerrado" && e !== "cerrada" && e !== "cancelado");
+  }
+
+  function clasePrioridad(prioridad) {
+    var p = String(prioridad || "").trim().toLowerCase();
+    if (p === "urgente") return "urgente";
+    if (p === "alta") return "alta";
+    if (p === "baja") return "baja";
+    return "media";
+  }
+
+  function cambiarEstadoTicket(filaIndex, nuevoEstado, dato, selectEl) {
+    selectEl.disabled = true;
+    google.script.run
+      .withSuccessHandler(function() {
+        dato.estado = nuevoEstado;
+        selectEl.disabled = false;
+        renderizarTickets();
+      })
+      .withFailureHandler(function(err) {
+        selectEl.disabled = false;
+        alert("No se pudo actualizar el ticket: " + (err && err.message ? err.message : err));
+      })
+      .cambiarEstadoTicket(filaIndex, nuevoEstado);
+  }
+
+  function avisarTrabajandoEnTicket(filaIndex, dato, boton) {
+    boton.disabled = true;
+    boton.textContent = "Avisando...";
+    google.script.run
+      .withSuccessHandler(function(resultado) {
+        dato.estado = resultado.estado;
+        renderizarTickets();
+        alert("Se avisó por correo a " + dato.correo + " que ya están trabajando en su ticket.");
+      })
+      .withFailureHandler(function(err) {
+        boton.disabled = false;
+        boton.textContent = "Avisar: trabajando en esto";
+        alert("No se pudo avisar: " + (err && err.message ? err.message : err));
+      })
+      .marcarTrabajandoEnTicket(filaIndex);
+  }
+
+  function guardarComentarioTicket(filaIndex, dato, campo) {
+    if (campo.value === (dato.comentarios || "")) return; // no cambio, no guardamos ni mandamos correo
+    campo.disabled = true;
+    google.script.run
+      .withSuccessHandler(function() {
+        dato.comentarios = campo.value;
+        campo.disabled = false;
+      })
+      .withFailureHandler(function(err) {
+        campo.disabled = false;
+        alert("No se pudo guardar el comentario: " + (err && err.message ? err.message : err));
+      })
+      .guardarComentarioTicket(filaIndex, campo.value);
+  }
+
+  function cancelarTicket(filaIndex, dato, boton) {
+    var motivo = prompt("Motivo de la cancelacion (obligatorio):", "");
+    if (motivo === null) return;
+    motivo = motivo.trim();
+    if (!motivo) {
+      alert("Debes escribir un motivo para cancelar el ticket.");
+      return;
+    }
+    boton.disabled = true;
+    boton.textContent = "...";
+    google.script.run
+      .withSuccessHandler(function(resultado) {
+        dato.estado = resultado.estado;
+        dato.comentarios = resultado.comentarios;
+        renderizarTickets();
+      })
+      .withFailureHandler(function(err) {
+        boton.disabled = false;
+        boton.textContent = "Cancelar";
+        alert("No se pudo cancelar el ticket: " + (err && err.message ? err.message : err));
+      })
+      .cancelarTicket(filaIndex, motivo);
+  }
+
+  function renderizarTickets() {
+    var filtro = document.getElementById("buscadorTickets").value.toLowerCase();
+    var fDepartamento = document.getElementById("filtroDepartamento").value;
+    var fPrioridad = document.getElementById("filtroPrioridad").value;
+    var fEstado = document.getElementById("filtroEstadoTicket").value;
+
+    llenarSelect("filtroDepartamento", datosTickets.map(function(t){ return t.departamento; }));
+
+    var filtrados = datosTickets.filter(function(t) {
+      if (fEstado === "abiertos" && !esTicketAbierto(t.estado)) return false;
+      if (fDepartamento && t.departamento !== fDepartamento) return false;
+      if (fPrioridad && t.prioridad !== fPrioridad) return false;
+      if (filtro && String(t.descripcion || "").toLowerCase().indexOf(filtro) === -1) return false;
+      return true;
+    });
+    filtrados.sort(function(a, b) { return new Date(b.fechaCreacion) - new Date(a.fechaCreacion); });
+
+    var tbody = document.getElementById("tbodyTickets");
+    tbody.innerHTML = "";
+
+    if (filtrados.length === 0) {
+      var trVacio = document.createElement("tr");
+      var tdVacio = document.createElement("td");
+      tdVacio.colSpan = 11;
+      tdVacio.innerHTML = '<div class="empty-state">No hay solicitudes que coincidan con estos filtros.</div>';
+      trVacio.appendChild(tdVacio);
+      tbody.appendChild(trVacio);
+    } else {
+      filtrados.forEach(function(t) {
+        var abierto = esTicketAbierto(t.estado);
+        var tr = document.createElement("tr");
+
+        var tdFecha = document.createElement("td");
+        tdFecha.className = "fecha-cell";
+        tdFecha.textContent = formatearFecha(t.fechaCreacion);
+        tr.appendChild(tdFecha);
+
+        var tdDepto = document.createElement("td");
+        tdDepto.className = "tag-cell";
+        tdDepto.textContent = t.departamento || "";
+        tr.appendChild(tdDepto);
+
+        var tdSolicitante = document.createElement("td");
+        tdSolicitante.className = "tag-cell";
+        tdSolicitante.textContent = t.correo || "";
+        tr.appendChild(tdSolicitante);
+
+        var tdDesc = document.createElement("td");
+        tdDesc.className = "desc-cell";
+        tdDesc.textContent = t.descripcion || "";
+        tr.appendChild(tdDesc);
+
+        var tdAdjunto = document.createElement("td");
+        tdAdjunto.className = "link-cell";
+        if (t.adjunto) {
+          var linkAdjunto = document.createElement("a");
+          linkAdjunto.href = t.adjunto;
+          linkAdjunto.target = "_blank";
+          linkAdjunto.rel = "noopener noreferrer";
+          linkAdjunto.textContent = "Ver archivo";
+          tdAdjunto.appendChild(linkAdjunto);
+        } else {
+          tdAdjunto.textContent = "-";
+        }
+        tr.appendChild(tdAdjunto);
+
+        var tdFechaReq = document.createElement("td");
+        tdFechaReq.className = "fecha-cell";
+        tdFechaReq.textContent = formatearFecha(t.fechaRequerida);
+        tr.appendChild(tdFechaReq);
+
+        var tdPrioridad = document.createElement("td");
+        var pillPrioridad = document.createElement("span");
+        pillPrioridad.className = "prioridad-pill " + clasePrioridad(t.prioridad);
+        pillPrioridad.textContent = t.prioridad || "";
+        tdPrioridad.appendChild(pillPrioridad);
+        tr.appendChild(tdPrioridad);
+
+        var tdAsignado = document.createElement("td");
+        tdAsignado.className = "tag-cell";
+        tdAsignado.textContent = t.sourcingAsignado || "Sin preferencia";
+        tr.appendChild(tdAsignado);
+
+        var estadoLowerTicket = String(t.estado || "Abierto").trim().toLowerCase();
+
+        var tdEstado = document.createElement("td");
+        var badgeEstado = document.createElement("span");
+        var claseBadgeEstado = "warn";
+        if (estadoLowerTicket === "cancelado") claseBadgeEstado = "overdue";
+        else if (!abierto) claseBadgeEstado = "fresh";
+        badgeEstado.className = "badge-pill " + claseBadgeEstado;
+        badgeEstado.textContent = t.estado || "Abierto";
+        tdEstado.appendChild(badgeEstado);
+        tr.appendChild(tdEstado);
+
+        var tdComentarios = document.createElement("td");
+        if (estadoLowerTicket === "cancelado") {
+          tdComentarios.className = "desc-cell";
+          tdComentarios.textContent = t.comentarios || "-";
+        } else {
+          var inputComentarios = document.createElement("input");
+          inputComentarios.type = "text";
+          inputComentarios.className = "input-comentario";
+          inputComentarios.value = t.comentarios || "";
+          inputComentarios.placeholder = "Estatus para el departamento...";
+          inputComentarios.onblur = (function(fila, dato, campo) {
+            return function() { guardarComentarioTicket(fila, dato, campo); };
+          })(t.fila, t, inputComentarios);
+          tdComentarios.appendChild(inputComentarios);
+        }
+        tr.appendChild(tdComentarios);
+
+        var tdAccion = document.createElement("td");
+        if (estadoLowerTicket === "cancelado") {
+          tdAccion.textContent = "—";
+        } else {
+          var selectEstado = document.createElement("select");
+          selectEstado.className = "select-reasignar";
+          ["Abierto", "En Proceso", "Cerrado"].forEach(function(opcion) {
+            var opt = document.createElement("option");
+            opt.value = opcion;
+            opt.textContent = opcion;
+            if ((t.estado || "Abierto") === opcion) opt.selected = true;
+            selectEstado.appendChild(opt);
+          });
+          selectEstado.onchange = (function(fila, dato, sel) {
+            return function() { cambiarEstadoTicket(fila, sel.value, dato, sel); };
+          })(t.fila, t, selectEstado);
+          tdAccion.appendChild(selectEstado);
+
+          if ((t.estado || "Abierto") === "Abierto") {
+            var btnAvisar = document.createElement("button");
+            btnAvisar.className = "btn-avisar-trabajando";
+            btnAvisar.textContent = "Avisar: trabajando en esto";
+            btnAvisar.onclick = (function(fila, dato, boton) {
+              return function() { avisarTrabajandoEnTicket(fila, dato, boton); };
+            })(t.fila, t, btnAvisar);
+            tdAccion.appendChild(btnAvisar);
+          }
+
+          var btnCancelarTicket = document.createElement("button");
+          btnCancelarTicket.className = "btn-cancelar-cot";
+          btnCancelarTicket.textContent = "Cancelar";
+          btnCancelarTicket.style.display = "block";
+          btnCancelarTicket.style.marginTop = "6px";
+          btnCancelarTicket.onclick = (function(fila, dato, boton) {
+            return function() { cancelarTicket(fila, dato, boton); };
+          })(t.fila, t, btnCancelarTicket);
+          tdAccion.appendChild(btnCancelarTicket);
+        }
+
+        tr.appendChild(tdAccion);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    var abiertosActuales = datosTickets.filter(function(t){ return esTicketAbierto(t.estado); });
+    document.getElementById("statTicketsAbiertos").textContent = abiertosActuales.length;
+    document.getElementById("statTicketsUrgentes").textContent = abiertosActuales.filter(function(t) {
+      var p = String(t.prioridad || "").toLowerCase();
+      return p === "alta" || p === "urgente";
+    }).length;
+    document.getElementById("statTicketsTotal").textContent = datosTickets.length;
+
+    document.getElementById("statusLineTickets").textContent = filtrados.length + " de " + datosTickets.length + " registros mostrados.";
+  }
+
+  function activarTab(tab) {
+    document.getElementById("vistaTareas").style.display = (tab === "tareas") ? "" : "none";
+    document.getElementById("vistaTickets").style.display = (tab === "tickets") ? "" : "none";
+    document.getElementById("vistaAdaptaciones").style.display = (tab === "adaptaciones") ? "" : "none";
+    document.getElementById("vistaIngenieria").style.display = (tab === "ingenieria") ? "" : "none";
+    document.getElementById("vistaKPIs").style.display = (tab === "kpis") ? "" : "none";
+    document.getElementById("tabBtnTareas").classList.toggle("activo", tab === "tareas");
+    document.getElementById("tabBtnTickets").classList.toggle("activo", tab === "tickets");
+    document.getElementById("tabBtnAdaptaciones").classList.toggle("activo", tab === "adaptaciones");
+    document.getElementById("tabBtnIngenieria").classList.toggle("activo", tab === "ingenieria");
+    document.getElementById("tabBtnKPIs").classList.toggle("activo", tab === "kpis");
+    if (tab === "ingenieria") renderizarIngenieria();
+  }
+
+  // --- Modal de "Agregar Proveedor", disponible como boton dentro de Tareas de Team Center ---
+
+  function abrirProveedores() {
+    document.getElementById("modalProveedoresOverlay").classList.add("abierto");
+    renderizarProveedores();
+  }
+
+  function cerrarProveedores() {
+    document.getElementById("modalProveedoresOverlay").classList.remove("abierto");
+  }
+
+  function renderizarIngenieria() {
+    var abiertasActuales = datosCompletos.filter(function(d){ return esAbierta(d.estado); });
+
+    // --- por area ---
+    var conteoArea = {};
+    var diasPorArea = {};
+    abiertasActuales.forEach(function(d) {
+      var area = (d.area && String(d.area).trim()) ? String(d.area).trim() : "Sin area";
+      conteoArea[area] = (conteoArea[area] || 0) + 1;
+      if (!diasPorArea[area]) diasPorArea[area] = [];
+      diasPorArea[area].push(diasAbierta(d.fecha));
+    });
+    var filasArea = Object.keys(conteoArea).map(function(area) {
+      var diasList = diasPorArea[area];
+      var promedio = diasList.length ? Math.round(diasList.reduce(function(a, b) { return a + b; }, 0) / diasList.length) : 0;
+      return { area: area, total: conteoArea[area], promedio: promedio };
+    });
+    filasArea.sort(function(a, b) { return b.total - a.total; });
+    var maxArea = filasArea.length ? filasArea[0].total : 0;
+
+    var tbody = document.getElementById("tbodyIngenieria");
+    tbody.innerHTML = "";
+
+    if (filasArea.length === 0) {
+      var trVacio = document.createElement("tr");
+      var tdVacio = document.createElement("td");
+      tdVacio.colSpan = 4;
+      tdVacio.innerHTML = '<div class="empty-state">No hay tareas abiertas.</div>';
+      trVacio.appendChild(tdVacio);
+      tbody.appendChild(trVacio);
+    } else {
+      filasArea.forEach(function(f) {
+        var tr = document.createElement("tr");
+        tr.style.cursor = "pointer";
+        tr.title = "Ver estas tareas en el Dashboard";
+        tr.onclick = (function(area) {
+          return function() {
+            activarTab("tareas");
+            document.getElementById("filtroArea").value = area;
+            renderizar();
+          };
+        })(f.area);
+
+        var tdArea = document.createElement("td");
+        tdArea.className = "tag-cell";
+        tdArea.textContent = f.area;
+        tr.appendChild(tdArea);
+
+        var tdBarra = document.createElement("td");
+        tdBarra.style.minWidth = "120px";
+        var barraCont = document.createElement("div");
+        barraCont.style.cssText = "background:var(--header-bg); border-radius:6px; height:8px; overflow:hidden; width:100%;";
+        var barra = document.createElement("div");
+        var pct = maxArea ? Math.round((f.total / maxArea) * 100) : 0;
+        barra.style.cssText = "background:var(--amber); height:100%; width:" + pct + "%;";
+        barraCont.appendChild(barra);
+        tdBarra.appendChild(barraCont);
+        tr.appendChild(tdBarra);
+
+        var tdTotal = document.createElement("td");
+        var badge = document.createElement("span");
+        badge.className = "badge-pill warn";
+        badge.textContent = f.total;
+        tdTotal.appendChild(badge);
+        tr.appendChild(tdTotal);
+
+        var tdPromedio = document.createElement("td");
+        var badgeDias = document.createElement("span");
+        badgeDias.className = "badge-pill " + nivelUrgencia(f.promedio);
+        badgeDias.textContent = f.promedio + "d";
+        tdPromedio.appendChild(badgeDias);
+        tr.appendChild(tdPromedio);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    // --- por ingeniero ---
+    var conteoIng = {};
+    abiertasActuales.forEach(function(d) {
+      var ing = (d.ingeniero && String(d.ingeniero).trim()) ? String(d.ingeniero).trim() : "Sin asignar";
+      conteoIng[ing] = (conteoIng[ing] || 0) + 1;
+    });
+    var filasIng = Object.keys(conteoIng).map(function(ing) { return { ingeniero: ing, total: conteoIng[ing] }; });
+    filasIng.sort(function(a, b) { return b.total - a.total; });
+
+    var tbodyIng = document.getElementById("tbodyIngenierosPersona");
+    tbodyIng.innerHTML = "";
+
+    if (filasIng.length === 0) {
+      var trVacioIng = document.createElement("tr");
+      var tdVacioIng = document.createElement("td");
+      tdVacioIng.colSpan = 2;
+      tdVacioIng.innerHTML = '<div class="empty-state">No hay tareas abiertas.</div>';
+      trVacioIng.appendChild(tdVacioIng);
+      tbodyIng.appendChild(trVacioIng);
+    } else {
+      filasIng.forEach(function(f) {
+        var tr = document.createElement("tr");
+
+        var tdIng = document.createElement("td");
+        tdIng.className = "tag-cell";
+        tdIng.textContent = f.ingeniero;
+        tr.appendChild(tdIng);
+
+        var tdTotal = document.createElement("td");
+        var badge = document.createElement("span");
+        badge.className = "badge-pill warn";
+        badge.textContent = f.total;
+        tdTotal.appendChild(badge);
+        tr.appendChild(tdTotal);
+
+        tbodyIng.appendChild(tr);
+      });
+    }
+
+    // --- KPIs ---
+    document.getElementById("statIngTotal").textContent = abiertasActuales.length;
+    document.getElementById("statIngAreaTop").textContent = filasArea.length ? (filasArea[0].area + " (" + filasArea[0].total + ")") : "-";
+    document.getElementById("statIngIngenieroTop").textContent = filasIng.length ? (filasIng[0].ingeniero + " (" + filasIng[0].total + ")") : "-";
+    document.getElementById("statIngUrgentes").textContent = abiertasActuales.filter(function(d) { return diasAbierta(d.fecha) > 21; }).length;
+  }
+
+  // --- Pestaña de Adaptaciones (Sourcing elige proveedor y envia el correo) ---
+
+  function esAdaptacionPendiente(estado) {
+    var e = String(estado || "").trim().toLowerCase();
+    return e !== "enviada" && e !== "enviado";
+  }
+
+  function enviarAdaptacion(filaIndex, dato, contenedorProveedores, boton) {
+    var seleccionados = Array.from(contenedorProveedores.querySelectorAll('input[type="checkbox"]:checked'))
+      .map(function(chk) { return { correo: chk.value, nombre: chk.dataset.nombre || "" }; });
+
+    var inputOtro = contenedorProveedores.querySelector(".prov-otro");
+    var otroCorreo = inputOtro ? inputOtro.value.trim() : "";
+    if (otroCorreo) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(otroCorreo)) {
+        alert("El correo adicional no se ve valido: " + otroCorreo);
+        return;
+      }
+      seleccionados.push({ correo: otroCorreo, nombre: "Otro (manual)" });
+    }
+
+    if (seleccionados.length === 0) {
+      alert("Selecciona al menos un proveedor (o escribe un correo) antes de enviar.");
+      return;
+    }
+
+    var correosTexto = seleccionados.map(function(p) { return p.correo; }).join(", ");
+    var confirmar = confirm("Se va a enviar un correo individual a cada uno de:\n" + correosTexto + "\n\n¿Confirmas?");
+    if (!confirmar) return;
+
+    boton.disabled = true;
+    boton.textContent = "Enviando...";
+    contenedorProveedores.querySelectorAll("input").forEach(function(el) { el.disabled = true; });
+
+    google.script.run
+      .withSuccessHandler(function(resultado) {
+        dato.estado = resultado.estado;
+        dato.proveedorAsignado = resultado.proveedorAsignado;
+        dato.correoProveedor = resultado.correoProveedor;
+        dato.fechaEnvio = resultado.fechaEnvio;
+        renderizarAdaptaciones();
+        alert("Correo(s) enviado(s) a: " + resultado.enviadoA.join(", ") + "\n(con copia al ingeniero que la solicito)");
+      })
+      .withFailureHandler(function(err) {
+        boton.disabled = false;
+        boton.textContent = "Enviar";
+        contenedorProveedores.querySelectorAll("input").forEach(function(el) { el.disabled = false; });
+        alert("No se pudo enviar: " + (err && err.message ? err.message : err));
+      })
+      .enviarAdaptacionAProveedor(filaIndex, seleccionados);
+  }
+
+  function renderizarAdaptaciones() {
+    var filtro = document.getElementById("buscadorAdaptaciones").value.toLowerCase();
+    var fEstado = document.getElementById("filtroEstadoAdaptacion").value;
+
+    var filtrados = datosAdaptaciones.filter(function(a) {
+      if (fEstado === "pendientes" && !esAdaptacionPendiente(a.estado)) return false;
+      if (filtro) {
+        var texto = (String(a.codigos) + " " + String(a.comentario)).toLowerCase();
+        if (texto.indexOf(filtro) === -1) return false;
+      }
+      return true;
+    });
+    filtrados.sort(function(a, b) { return new Date(b.fechaCreacion) - new Date(a.fechaCreacion); });
+
+    var tbody = document.getElementById("tbodyAdaptaciones");
+    tbody.innerHTML = "";
+
+    if (filtrados.length === 0) {
+      var trVacio = document.createElement("tr");
+      var tdVacio = document.createElement("td");
+      tdVacio.colSpan = 8;
+      tdVacio.innerHTML = '<div class="empty-state">No hay adaptaciones que coincidan con estos filtros.</div>';
+      trVacio.appendChild(tdVacio);
+      tbody.appendChild(trVacio);
+    } else {
+      filtrados.forEach(function(a) {
+        var pendiente = esAdaptacionPendiente(a.estado);
+        var tr = document.createElement("tr");
+
+        var tdFecha = document.createElement("td");
+        tdFecha.className = "fecha-cell";
+        tdFecha.textContent = formatearFecha(a.fechaCreacion);
+        tr.appendChild(tdFecha);
+
+        var tdIngeniero = document.createElement("td");
+        tdIngeniero.className = "tag-cell";
+        tdIngeniero.textContent = a.nombreIngeniero || "";
+        tr.appendChild(tdIngeniero);
+
+        var tdCarpeta = document.createElement("td");
+        tdCarpeta.className = "link-cell";
+        if (a.carpetaDrive) {
+          var link = document.createElement("a");
+          link.href = a.carpetaDrive;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.textContent = "Ver carpeta";
+          tdCarpeta.appendChild(link);
+        } else {
+          tdCarpeta.textContent = "-";
+        }
+        tr.appendChild(tdCarpeta);
+
+        var tdCodigos = document.createElement("td");
+        tdCodigos.className = "tag-cell";
+        tdCodigos.textContent = a.codigos || "";
+        tr.appendChild(tdCodigos);
+
+        var tdComentario = document.createElement("td");
+        tdComentario.className = "desc-cell";
+        tdComentario.textContent = a.comentario || "-";
+        tr.appendChild(tdComentario);
+
+        var tdEstado = document.createElement("td");
+        var badgeEstado = document.createElement("span");
+        badgeEstado.className = "badge-pill " + (pendiente ? "warn" : "fresh");
+        badgeEstado.textContent = a.estado || "Pendiente";
+        tdEstado.appendChild(badgeEstado);
+        tr.appendChild(tdEstado);
+
+        var tdProveedor = document.createElement("td");
+        tdProveedor.className = "tag-cell";
+        tdProveedor.textContent = a.proveedorAsignado || "-";
+        tr.appendChild(tdProveedor);
+
+        var tdAccion = document.createElement("td");
+        if (pendiente) {
+          var wrapProveedores = document.createElement("div");
+          wrapProveedores.className = "prov-wrap";
+
+          var listaProveedores = document.createElement("div");
+          listaProveedores.className = "prov-list";
+          if (proveedoresCalcas.length === 0) {
+            var msgVacio = document.createElement("div");
+            msgVacio.className = "prov-vacio";
+            msgVacio.textContent = "Sin proveedores de calcas";
+            listaProveedores.appendChild(msgVacio);
+          } else {
+            proveedoresCalcas.forEach(function(p) {
+              listaProveedores.appendChild(crearChipProveedor(p.correo, p.proveedor, p.proveedor));
+            });
+          }
+          wrapProveedores.appendChild(listaProveedores);
+
+          var inputOtroCorreo = document.createElement("input");
+          inputOtroCorreo.type = "text";
+          inputOtroCorreo.className = "prov-otro";
+          inputOtroCorreo.placeholder = "+ otro correo";
+          wrapProveedores.appendChild(inputOtroCorreo);
+
+          var btnEnviar = document.createElement("button");
+          btnEnviar.className = "btn-enviar-adaptacion";
+          btnEnviar.textContent = "Enviar";
+          btnEnviar.style.marginTop = "6px";
+          btnEnviar.style.display = "block";
+          btnEnviar.onclick = (function(fila, dato, contenedor, boton) {
+            return function() { enviarAdaptacion(fila, dato, contenedor, boton); };
+          })(a.fila, a, wrapProveedores, btnEnviar);
+          wrapProveedores.appendChild(btnEnviar);
+
+          tdAccion.appendChild(wrapProveedores);
+        } else {
+          tdAccion.textContent = a.fechaEnvio ? ("Enviado " + formatearFecha(a.fechaEnvio)) : "Enviado";
+        }
+        tr.appendChild(tdAccion);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.getElementById("statAdaptacionesPendientes").textContent = datosAdaptaciones.filter(function(a){ return esAdaptacionPendiente(a.estado); }).length;
+    document.getElementById("statAdaptacionesEnviadas").textContent = datosAdaptaciones.filter(function(a){ return !esAdaptacionPendiente(a.estado); }).length;
+    document.getElementById("statAdaptacionesTotal").textContent = datosAdaptaciones.length;
+    document.getElementById("statusLineAdaptaciones").textContent = filtrados.length + " de " + datosAdaptaciones.length + " registros mostrados.";
+  }
+
+  // --- Pestaña de Agregar Proveedor ---
+
+  function renderizarProveedores() {
+    var filtro = document.getElementById("buscadorProveedores").value.toLowerCase();
+
+    var datalist = document.getElementById("listaCommodities");
+    var commoditiesUnicos = Array.from(new Set(
+      proveedoresCompletos.map(function(p){ return p.commodity; }).filter(function(v){ return v && String(v).trim(); })
+    )).sort(function(a,b){ return String(a).localeCompare(String(b), "es"); });
+    datalist.innerHTML = "";
+    commoditiesUnicos.forEach(function(c) {
+      var opt = document.createElement("option");
+      opt.value = c;
+      datalist.appendChild(opt);
+    });
+
+    var filtrados = proveedoresRecienAgregados.filter(function(p) {
+      if (!filtro) return true;
+      var texto = (String(p.nomenclatura || "") + " " + String(p.supplierId || "") + " " + String(p.proveedor || "") + " " +
+                   String(p.commodity || "") + " " + String(p.responsable || "") + " " + String(p.compras || "") + " " +
+                   String(p.contacto || "") + " " + String(p.correo || "")).toLowerCase();
+      return texto.indexOf(filtro) !== -1;
+    });
+    filtrados.sort(function(a, b) { return String(a.proveedor || "").localeCompare(String(b.proveedor || ""), "es"); });
+
+    var tbody = document.getElementById("tbodyProveedores");
+    tbody.innerHTML = "";
+
+    if (filtrados.length === 0) {
+      var trVacio = document.createElement("tr");
+      var tdVacio = document.createElement("td");
+      tdVacio.colSpan = 8;
+      tdVacio.innerHTML = '<div class="empty-state">' + (proveedoresRecienAgregados.length === 0 ? "Aqui iran apareciendo los proveedores que agregues en esta sesion." : "No hay proveedores que coincidan con esta busqueda.") + '</div>';
+      trVacio.appendChild(tdVacio);
+      tbody.appendChild(trVacio);
+    } else {
+      filtrados.forEach(function(p) {
+        var tr = document.createElement("tr");
+
+        var tdNomenclatura = document.createElement("td");
+        tdNomenclatura.className = "tag-cell";
+        tdNomenclatura.textContent = p.nomenclatura || "-";
+        tr.appendChild(tdNomenclatura);
+
+        var tdSupplierId = document.createElement("td");
+        tdSupplierId.className = "tag-cell";
+        tdSupplierId.textContent = p.supplierId || "-";
+        tr.appendChild(tdSupplierId);
+
+        var tdProv = document.createElement("td");
+        tdProv.className = "codigo prov-name-cell";
+        tdProv.textContent = p.proveedor || "";
+        tdProv.title = p.proveedor || "";
+        tr.appendChild(tdProv);
+
+        var tdCommodity = document.createElement("td");
+        tdCommodity.className = "tag-cell";
+        tdCommodity.textContent = p.commodity || "";
+        tr.appendChild(tdCommodity);
+
+        var tdResponsable = document.createElement("td");
+        tdResponsable.className = "tag-cell";
+        tdResponsable.textContent = p.responsable || "-";
+        tr.appendChild(tdResponsable);
+
+        var tdCompras = document.createElement("td");
+        tdCompras.className = "tag-cell";
+        tdCompras.textContent = p.compras || "-";
+        tr.appendChild(tdCompras);
+
+        var tdContacto = document.createElement("td");
+        tdContacto.className = "tag-cell";
+        tdContacto.textContent = p.contacto || "-";
+        tr.appendChild(tdContacto);
+
+        var tdCorreo = document.createElement("td");
+        tdCorreo.className = "tag-cell";
+        tdCorreo.textContent = p.correo || "";
+        tr.appendChild(tdCorreo);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.getElementById("statusLineProveedores").textContent = filtrados.length + " de " + proveedoresRecienAgregados.length + " proveedores agregados en esta sesion.";
+  }
+
+  function agregarProveedor() {
+    var campoNomenclatura = document.getElementById("nuevoProvNomenclatura");
+    var campoSupplierId = document.getElementById("nuevoProvSupplierId");
+    var campoNombre = document.getElementById("nuevoProvNombre");
+    var campoCommodity = document.getElementById("nuevoProvCommodity");
+    var campoResponsable = document.getElementById("nuevoProvResponsable");
+    var campoCompras = document.getElementById("nuevoProvCompras");
+    var campoContacto = document.getElementById("nuevoProvContacto");
+    var campoCorreo = document.getElementById("nuevoProvCorreo");
+
+    var nomenclatura = campoNomenclatura.value.trim();
+    var supplierId = campoSupplierId.value.trim();
+    var nombre = campoNombre.value.trim();
+    var commodity = campoCommodity.value.trim();
+    var responsable = campoResponsable.value.trim();
+    var compras = campoCompras.value.trim();
+    var contacto = campoContacto.value.trim();
+    var correo = campoCorreo.value.trim();
+
+    if (!nombre) { alert("Escribe el nombre (Name) del proveedor."); campoNombre.focus(); return; }
+    if (!commodity) { alert("Escribe el commodity al que pertenece este proveedor."); campoCommodity.focus(); return; }
+    if (!correo || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) { alert("Escribe un correo de contacto valido."); campoCorreo.focus(); return; }
+
+    var yaExiste = proveedoresCompletos.some(function(p) {
+      return p.correo.trim().toLowerCase() === correo.toLowerCase() && p.commodity.trim().toLowerCase() === commodity.toLowerCase();
+    });
+    if (yaExiste) {
+      alert("Ese proveedor ya esta en la lista para este commodity.");
+      return;
+    }
+
+    var nuevoProveedor = {
+      nomenclatura: nomenclatura, supplierId: supplierId, proveedor: nombre, commodity: commodity,
+      responsable: responsable, compras: compras, contacto: contacto, correo: correo
+    };
+
+    var boton = document.getElementById("btnAgregarProveedor");
+    boton.disabled = true;
+    var textoOriginal = boton.textContent;
+    boton.textContent = "Agregando...";
+
+    google.script.run
+      .withSuccessHandler(function() {
+        proveedoresCompletos.push(nuevoProveedor);
+        proveedoresRecienAgregados.push(nuevoProveedor);
+        campoNomenclatura.value = "";
+        campoSupplierId.value = "";
+        campoNombre.value = "";
+        campoCommodity.value = "";
+        campoResponsable.value = "";
+        campoCompras.value = "";
+        campoContacto.value = "";
+        campoCorreo.value = "";
+        boton.disabled = false;
+        boton.textContent = textoOriginal;
+        renderizarProveedores();
+        alert("Proveedor agregado. Ya aparece como opcion para RFQs de commodity \"" + commodity + "\".");
+      })
+      .withFailureHandler(function(err) {
+        boton.disabled = false;
+        boton.textContent = textoOriginal;
+        alert("No se pudo agregar el proveedor: " + (err && err.message ? err.message : err));
+      })
+      .agregarProveedor(nuevoProveedor);
+  }
+
+  function aplicarIdentidad() {
+    var el = document.getElementById("identidadLine");
+    var puntoEl = el.querySelector(".punto");
+    var texto = document.getElementById("identidadTexto");
+    if (!correoActual) return;
+
+    var nombreMostrado = nombreActual || correoActual;
+    if (esJefe) {
+      texto.textContent = nombreMostrado + " · todo el equipo";
+      texto.title = "Conectado como " + nombreMostrado + " · viendo las tareas de todo el equipo";
+      puntoEl.textContent = "🟠";
+    } else if (esUsuarioResponsableDeNA()) {
+      texto.textContent = nombreMostrado + " · +#N/A";
+      texto.title = "Conectado como " + nombreMostrado + " · tambien ves las tareas sin Sourcing asignado (#N/A)";
+      puntoEl.textContent = "🟢";
+    } else {
+      texto.textContent = nombreMostrado;
+      texto.title = "Conectado como " + nombreMostrado + (nombreActual ? " (" + correoActual + ")" : "");
+      puntoEl.textContent = "🟢";
+    }
+    el.style.display = "flex";
+
+    if (nombreActual) {
+      var selSourcing = document.getElementById("filtroSourcing");
+      var nombreNormalizado = nombreActual.trim().toLowerCase();
+      var opcionEncontrada = Array.from(selSourcing.options).find(function(o) {
+        return o.value.trim().toLowerCase() === nombreNormalizado;
+      });
+      if (opcionEncontrada) {
+        selSourcing.value = opcionEncontrada.value;
+        renderizar();
+      }
+    }
+  }
+
+  function aplicarEstadoTrigger() {
+    if (!correoActual) return;
+    var bloque = document.getElementById("triggerLine");
+    var texto = document.getElementById("triggerTexto");
+    var boton = document.getElementById("btnActivarTrigger");
+
+    function pintar() {
+      if (estadoAutomatizaciones.completo) {
+        texto.textContent = "✅ Tus automatizaciones (recordatorios + revisión de respuestas) ya están activas.";
+        boton.style.display = "none";
+      } else if (estadoAutomatizaciones.recordatorios || estadoAutomatizaciones.revision) {
+        texto.textContent = "⚠️ Te falta activar una parte de tus automatizaciones.";
+        boton.style.display = "inline-block";
+        boton.textContent = "Completar activación";
+      } else {
+        texto.textContent = "⚠️ Aún no activas tus automatizaciones (recordatorios + revisión de respuestas).";
+        boton.style.display = "inline-block";
+        boton.textContent = "Activar mis automatizaciones";
+      }
+    }
+    pintar();
+    bloque.style.display = "flex";
+
+    boton.onclick = function() {
+      boton.disabled = true;
+      boton.textContent = "Activando...";
+      google.script.run
+        .withSuccessHandler(function(resultado) {
+          estadoAutomatizaciones = resultado;
+          pintar();
+          boton.disabled = false;
+          alert("¡Listo! A partir de ahora, tus recordatorios de seguimiento y la revisión de respuestas de tus proveedores corren automáticamente, desde tu propio correo.");
+        })
+        .withFailureHandler(function(err) {
+          boton.disabled = false;
+          pintar();
+          alert("No se pudo activar: " + (err && err.message ? err.message : err) +
+                "\n\nSi se abrió una ventana pidiendo autorización, acéptala e intenta de nuevo.");
+        })
+        .activarAutomatizacionesPropias();
+    };
+  }
+
+  document.getElementById("buscador").addEventListener("input", renderizar);
+  document.getElementById("filtroSourcing").addEventListener("change", renderizar);
+  document.getElementById("filtroArea").addEventListener("change", renderizar);
+  document.getElementById("filtroCommodity").addEventListener("change", renderizar);
+  document.getElementById("filtroEstado").addEventListener("change", renderizar);
+
+  document.getElementById("buscadorTickets").addEventListener("input", renderizarTickets);
+  document.getElementById("filtroDepartamento").addEventListener("change", renderizarTickets);
+  document.getElementById("filtroPrioridad").addEventListener("change", renderizarTickets);
+  document.getElementById("filtroEstadoTicket").addEventListener("change", renderizarTickets);
+
+  document.getElementById("buscadorAdaptaciones").addEventListener("input", renderizarAdaptaciones);
+  document.getElementById("filtroEstadoAdaptacion").addEventListener("change", renderizarAdaptaciones);
+
+  document.getElementById("buscadorProveedores").addEventListener("input", renderizarProveedores);
+  document.getElementById("btnAgregarProveedor").addEventListener("click", agregarProveedor);
+  document.getElementById("btnAbrirProveedores").addEventListener("click", abrirProveedores);
+  document.getElementById("modalProveedoresOverlay").addEventListener("click", function(e) {
+    if (e.target === this) cerrarProveedores();
+  });
+
+  document.getElementById("tabBtnTareas").addEventListener("click", function() { activarTab("tareas"); });
+  document.getElementById("tabBtnTickets").addEventListener("click", function() { activarTab("tickets"); });
+  document.getElementById("tabBtnAdaptaciones").addEventListener("click", function() { activarTab("adaptaciones"); });
+  document.getElementById("tabBtnIngenieria").addEventListener("click", function() { activarTab("ingenieria"); });
+  document.getElementById("tabBtnKPIs").addEventListener("click", function() { activarTab("kpis"); });
+
+  renderizar();
+  renderizarTickets();
+  renderizarAdaptaciones();
+  aplicarIdentidad();
+  aplicarEstadoTrigger();
+
+</script>
