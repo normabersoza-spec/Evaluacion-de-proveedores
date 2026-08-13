@@ -892,16 +892,24 @@
     // a azul (esperando) en vez de quedarse naranja/rojo con datos viejos.
     var activas = todas.filter(function(c) { return c.estado !== "Cancelado"; });
 
+    function tienePrecio(c) {
+      var p = Number(c.precio);
+      return c.precio !== "" && c.precio !== null && c.precio !== undefined && !isNaN(p);
+    }
+
     // Rojo: algun proveedor activo respondio pero sin el excel adjunto, o
-    // el excel no traia la informacion necesaria (precio/moneda/etc).
-    var hayIncompleto = activas.some(function(c) { return c.estado === "Respondido incompleto"; });
+    // el excel no traia la informacion necesaria (precio/moneda/etc). Se
+    // revisa tambien por datos (no solo por el texto exacto del Estado)
+    // para agarrar filas viejas que quedaron en "Respondido" sin precio,
+    // de antes de que existiera el estado "Respondido incompleto".
+    var hayIncompleto = activas.some(function(c) {
+      if (c.estado === "Respondido incompleto") return true;
+      return c.estado === "Respondido" && !tienePrecio(c);
+    });
     if (hayIncompleto) return "rojo";
 
     // Naranja: ya se recibio el precio de al menos un proveedor activo.
-    var hayConPrecio = activas.some(function(c) {
-      var p = Number(c.precio);
-      return c.precio !== "" && c.precio !== null && c.precio !== undefined && !isNaN(p);
-    });
+    var hayConPrecio = activas.some(tienePrecio);
     if (hayConPrecio) return "naranja";
 
     // Azul: ya se mando algun RFQ y no hay ninguna respuesta activa
