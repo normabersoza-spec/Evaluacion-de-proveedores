@@ -613,26 +613,34 @@
     var campoProv = document.createElement("div");
     campoProv.className = "campo-mini";
     campoProv.innerHTML = '<label>Proveedores (RFQ)</label>';
-    var wrapProveedores = document.createElement("div");
-    var prefijoFila = normalizarCodigoM(d.codigo).substring(0, 3);
-    var opcionesProveedor = deduplicarProveedoresM(proveedoresCompletos.filter(function(p) { return String(p.nomenclatura || "").trim().toUpperCase() === prefijoFila; }));
-    var listaProv = document.createElement("div");
-    listaProv.className = "prov-list";
-    if (opcionesProveedor.length === 0) {
-      listaProv.innerHTML = '<span class="text-[10.5px] italic text-on-surface-variant">Sin proveedores para esta nomenclatura</span>';
+    var wrapProveedores = null;
+    if (esRevisionPasada) {
+      var pSinProveedores = document.createElement("p");
+      pSinProveedores.className = "text-[12px] text-on-surface-variant";
+      pSinProveedores.textContent = "-";
+      campoProv.appendChild(pSinProveedores);
     } else {
-      opcionesProveedor.forEach(function(p) {
-        listaProv.appendChild(crearChipProveedorM(p.correo, p.proveedor, undefined, p.proveedor + (p.contacto ? " — " + p.contacto : "")));
-      });
+      wrapProveedores = document.createElement("div");
+      var prefijoFila = normalizarCodigoM(d.codigo).substring(0, 3);
+      var opcionesProveedor = deduplicarProveedoresM(proveedoresCompletos.filter(function(p) { return String(p.nomenclatura || "").trim().toUpperCase() === prefijoFila; }));
+      var listaProv = document.createElement("div");
+      listaProv.className = "prov-list";
+      if (opcionesProveedor.length === 0) {
+        listaProv.innerHTML = '<span class="text-[10.5px] italic text-on-surface-variant">Sin proveedores para esta nomenclatura</span>';
+      } else {
+        opcionesProveedor.forEach(function(p) {
+          listaProv.appendChild(crearChipProveedorM(p.correo, p.proveedor, undefined, p.proveedor + (p.contacto ? " — " + p.contacto : "")));
+        });
+      }
+      wrapProveedores.appendChild(listaProv);
+      wrapProveedores._opciones = opcionesProveedor;
+      var inputOtro = document.createElement("input");
+      inputOtro.type = "text";
+      inputOtro.placeholder = "+ otro correo";
+      inputOtro.className = "prov-otro mt-1";
+      wrapProveedores.appendChild(inputOtro);
+      campoProv.appendChild(wrapProveedores);
     }
-    wrapProveedores.appendChild(listaProv);
-    wrapProveedores._opciones = opcionesProveedor;
-    var inputOtro = document.createElement("input");
-    inputOtro.type = "text";
-    inputOtro.placeholder = "+ otro correo";
-    inputOtro.className = "prov-otro mt-1";
-    wrapProveedores.appendChild(inputOtro);
-    campoProv.appendChild(wrapProveedores);
     card.appendChild(campoProv);
 
     // Cotizaciones + dibujo
@@ -662,24 +670,8 @@
     // Acciones
     if (esRevisionPasada) {
       var accion = document.createElement("div");
-      if (abierta) {
-        var btnCancelarRevision = document.createElement("button");
-        btnCancelarRevision.className = "btn-mini btn-mini-danger";
-        btnCancelarRevision.textContent = "Cancelar (revisión anterior)";
-        btnCancelarRevision.onclick = (function(fila, dato, boton) {
-          return function() {
-            if (!confirm("Esta revisión ya no es la vigente para " + dato.codigo + ". ¿Cancelarla?")) return;
-            boton.disabled = true; boton.textContent = "...";
-            google.script.run
-              .withSuccessHandler(function(resultado) { dato.estado = resultado.estado; renderizarM(); abrirRevisionesM(normalizarCodigoM(dato.codigo), agruparPorCodigoM(datosCompletos).mapa[normalizarCodigoM(dato.codigo)] || [dato]); })
-              .withFailureHandler(function(err) { boton.disabled = false; boton.textContent = "Cancelar (revisión anterior)"; alert("No se pudo cancelar: " + (err && err.message ? err.message : err)); })
-              .cancelarRevisionPasada(fila, dato.codigo, dato.revision);
-          };
-        })(d.fila, d, btnCancelarRevision);
-        accion.appendChild(btnCancelarRevision);
-      } else {
-        accion.innerHTML = '<span class="badge bg-gray-100 text-gray-600 border-gray-200">Revisión anterior</span>';
-      }
+      accion.className = "text-[12px] text-on-surface-variant";
+      accion.textContent = "Cancelada, revisión anterior";
       card.appendChild(accion);
       return card;
     }
@@ -734,13 +726,6 @@
     })(d.fila, d.codigo, d.revision, d.descripcion, inputMuestras, inputEAU, wrapProveedores, btnCotizar);
     filaBotonesAccion.appendChild(btnCotizar);
 
-    if (abierta) {
-      var btnCerrar = document.createElement("button");
-      btnCerrar.className = "btn-mini btn-mini-green";
-      btnCerrar.textContent = "Cerrar";
-      btnCerrar.onclick = (function(fila, boton) { return function() { cerrarTareaM(fila, boton); }; })(d.fila, btnCerrar);
-      filaBotonesAccion.appendChild(btnCerrar);
-    }
     accionesActuales.appendChild(filaBotonesAccion);
     card.appendChild(accionesActuales);
 
