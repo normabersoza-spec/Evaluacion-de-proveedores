@@ -1016,16 +1016,10 @@
     tr.appendChild(tdGantt);
 
     var tdEstado = document.createElement("td");
-    var badge = document.createElement("span");
-    badge.className = "badge-pill " + (abiertasCount > 0 ? "warn" : "fresh");
-    badge.textContent = abiertasCount > 0 ? (abiertasCount + " abierta(s)") : "Todas cerradas";
-    tdEstado.appendChild(badge);
-
     var rfqsAbiertos = contarRFQsAbiertos(revisiones);
     if (rfqsAbiertos > 0) {
       var badgeRFQ = document.createElement("span");
       badgeRFQ.className = "badge-pill warn";
-      badgeRFQ.style.marginLeft = "4px";
       badgeRFQ.title = "RFQ's mandados al proveedor, aun sin cotizacion de vuelta";
       badgeRFQ.textContent = rfqsAbiertos + (rfqsAbiertos === 1 ? " RFQ pendiente" : " RFQs pendientes");
       tdEstado.appendChild(badgeRFQ);

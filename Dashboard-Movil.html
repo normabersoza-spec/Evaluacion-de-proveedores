@@ -474,9 +474,6 @@
           '<span class="font-data-tabular text-data-tabular text-on-surface-variant text-[11px]">' + formatearFechaM(ultima.fecha) + (revisiones.length > 1 ? (' &middot; ' + revisiones.length + ' rev.') : '') + '</span>' +
         '</div>' +
         '<div class="flex flex-col items-end gap-1">' +
-          '<span class="badge ' + (abiertasCount > 0 ? badgeClasesUrgencia(nivel) : "bg-gray-100 text-gray-600 border-gray-200") + '">' +
-            (abiertasCount > 0 ? (abiertasCount + " abierta" + (abiertasCount>1?"s":"") + (maxDias?(" · "+maxDias+"d"):"")) : "Todas cerradas") +
-          '</span>' +
           (rfqsAbiertos > 0 ? ('<span class="badge bg-amber-100 text-amber-800 border-amber-200">' + rfqsAbiertos + (rfqsAbiertos === 1 ? ' RFQ pendiente' : ' RFQs pendientes') + '</span>') : '') +
         '</div>' +
       '</div>' +
