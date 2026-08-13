@@ -490,6 +490,19 @@
     });
   }
 
+  // Cuenta los RFQ's que siguen con Estado = "Enviado" en el Log RFQ (ya se
+  // le mando la cotizacion al proveedor pero todavia no responde), sumando
+  // todas las revisiones del grupo (no solo la vigente).
+  function contarRFQsAbiertos(revisiones) {
+    var total = 0;
+    revisiones.forEach(function(d) {
+      (d.cotizaciones || []).forEach(function(c) {
+        if (c.estado === "Enviado") total++;
+      });
+    });
+    return total;
+  }
+
   function agruparPorCodigo(lista) {
     var mapa = {};
     var orden = [];
@@ -1007,6 +1020,16 @@
     badge.className = "badge-pill " + (abiertasCount > 0 ? "warn" : "fresh");
     badge.textContent = abiertasCount > 0 ? (abiertasCount + " abierta(s)") : "Todas cerradas";
     tdEstado.appendChild(badge);
+
+    var rfqsAbiertos = contarRFQsAbiertos(revisiones);
+    if (rfqsAbiertos > 0) {
+      var badgeRFQ = document.createElement("span");
+      badgeRFQ.className = "badge-pill warn";
+      badgeRFQ.style.marginLeft = "4px";
+      badgeRFQ.title = "RFQ's mandados al proveedor, aun sin cotizacion de vuelta";
+      badgeRFQ.textContent = rfqsAbiertos + (rfqsAbiertos === 1 ? " RFQ pendiente" : " RFQs pendientes");
+      tdEstado.appendChild(badgeRFQ);
+    }
     tr.appendChild(tdEstado);
 
     var tdReasignar = document.createElement("td");

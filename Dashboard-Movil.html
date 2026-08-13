@@ -284,6 +284,19 @@
     });
   }
 
+  // Cuenta los RFQ's que siguen con Estado = "Enviado" en el Log RFQ (ya se
+  // le mando la cotizacion al proveedor pero todavia no responde), sumando
+  // todas las revisiones del grupo (no solo la vigente).
+  function contarRFQsAbiertosM(revisiones) {
+    var total = 0;
+    revisiones.forEach(function(d) {
+      (d.cotizaciones || []).forEach(function(c) {
+        if (c.estado === "Enviado") total++;
+      });
+    });
+    return total;
+  }
+
   function agruparPorCodigoM(lista) {
     var mapa = {}, orden = [];
     lista.forEach(function(d) {
@@ -448,6 +461,7 @@
     var diasList = revisiones.filter(function(x){ return esAbiertaM(x.estado); }).map(function(x){ return diasAbiertaM(x.fecha); });
     var maxDias = diasList.length ? Math.max.apply(null, diasList) : 0;
     var nivel = nivelUrgenciaM(maxDias);
+    var rfqsAbiertos = contarRFQsAbiertosM(revisiones);
 
     var art = document.createElement("article");
     art.className = "bg-surface-bright border border-outline-variant rounded-lg p-sm flex flex-col gap-xs cursor-pointer hover:border-secondary/50 transition-colors";
@@ -459,9 +473,12 @@
           '<span class="font-label-md text-label-md text-secondary truncate">' + (ultima.codigo || "") + ' <span class="text-on-surface-variant">Rev.' + (ultima.revision || "") + '</span></span>' +
           '<span class="font-data-tabular text-data-tabular text-on-surface-variant text-[11px]">' + formatearFechaM(ultima.fecha) + (revisiones.length > 1 ? (' &middot; ' + revisiones.length + ' rev.') : '') + '</span>' +
         '</div>' +
-        '<span class="badge ' + (abiertasCount > 0 ? badgeClasesUrgencia(nivel) : "bg-gray-100 text-gray-600 border-gray-200") + '">' +
-          (abiertasCount > 0 ? (abiertasCount + " abierta" + (abiertasCount>1?"s":"") + (maxDias?(" · "+maxDias+"d"):"")) : "Todas cerradas") +
-        '</span>' +
+        '<div class="flex flex-col items-end gap-1">' +
+          '<span class="badge ' + (abiertasCount > 0 ? badgeClasesUrgencia(nivel) : "bg-gray-100 text-gray-600 border-gray-200") + '">' +
+            (abiertasCount > 0 ? (abiertasCount + " abierta" + (abiertasCount>1?"s":"") + (maxDias?(" · "+maxDias+"d"):"")) : "Todas cerradas") +
+          '</span>' +
+          (rfqsAbiertos > 0 ? ('<span class="badge bg-amber-100 text-amber-800 border-amber-200">' + rfqsAbiertos + (rfqsAbiertos === 1 ? ' RFQ pendiente' : ' RFQs pendientes') + '</span>') : '') +
+        '</div>' +
       '</div>' +
       '<h3 class="font-body-md text-body-md font-semibold text-on-surface leading-tight">' + (ultima.descripcion || "") + '</h3>' +
       '<div class="grid grid-cols-2 gap-2 mt-1">' +
