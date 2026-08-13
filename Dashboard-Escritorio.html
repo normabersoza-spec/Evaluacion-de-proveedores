@@ -1021,7 +1021,7 @@
       var badgeRFQ = document.createElement("span");
       badgeRFQ.className = "badge-pill warn";
       badgeRFQ.title = "RFQ's mandados al proveedor, aun sin cotizacion de vuelta";
-      badgeRFQ.textContent = rfqsAbiertos + (rfqsAbiertos === 1 ? " RFQ pendiente" : " RFQs pendientes");
+      badgeRFQ.textContent = rfqsAbiertos + (rfqsAbiertos === 1 ? " abierta" : " abiertas");
       tdEstado.appendChild(badgeRFQ);
     }
     tr.appendChild(tdEstado);
