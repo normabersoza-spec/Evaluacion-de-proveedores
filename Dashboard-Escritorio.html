@@ -1034,6 +1034,8 @@
       badgeRFQ.title = "RFQ's mandados al proveedor, aun sin cotizacion de vuelta";
       badgeRFQ.textContent = rfqsAbiertos + (rfqsAbiertos === 1 ? " abierta" : " abiertas");
       tdEstado.appendChild(badgeRFQ);
+    } else {
+      tdEstado.textContent = "-";
     }
     tr.appendChild(tdEstado);
 
