@@ -476,6 +476,20 @@
 
   function normalizarCodigo(c) { return String(c || "").trim().toUpperCase(); }
 
+  // Un mismo proveedor (mismo correo) puede aparecer en varias filas de la
+  // hoja "Proveedores" (una por cada nomenclatura/commodity que maneja).
+  // Al armar listas para mostrar en pantalla, nos quedamos solo con la
+  // primera fila de cada correo para no repetir al mismo proveedor.
+  function deduplicarProveedores(lista) {
+    var vistos = {};
+    return lista.filter(function(p) {
+      var key = String(p.correo || "").trim().toLowerCase();
+      if (!key || vistos[key]) return false;
+      vistos[key] = true;
+      return true;
+    });
+  }
+
   function agruparPorCodigo(lista) {
     var mapa = {};
     var orden = [];
@@ -1091,17 +1105,17 @@
     wrapProveedores.className = "prov-wrap";
     wrapProveedores.onclick = function(e) { e.stopPropagation(); };
 
-    var commodityFila = (d.commodity || "").trim().toLowerCase();
-    var opcionesProveedor = proveedoresCompletos.filter(function(p) {
-      return (p.commodity || "").trim().toLowerCase() === commodityFila;
-    });
+    var prefijoFila = normalizarCodigo(d.codigo).substring(0, 3);
+    var opcionesProveedor = deduplicarProveedores(proveedoresCompletos.filter(function(p) {
+      return String(p.nomenclatura || "").trim().toUpperCase() === prefijoFila;
+    }));
 
     var listaProveedores = document.createElement("div");
     listaProveedores.className = "prov-list";
     if (opcionesProveedor.length === 0) {
       var msgVacio = document.createElement("div");
       msgVacio.className = "prov-vacio";
-      msgVacio.textContent = "Sin proveedores para este commodity";
+      msgVacio.textContent = "Sin proveedores para esta nomenclatura";
       listaProveedores.appendChild(msgVacio);
     } else {
       opcionesProveedor.forEach(function(p) {

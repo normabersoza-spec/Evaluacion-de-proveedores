@@ -270,6 +270,20 @@
   // ------------------------------------------------------------------
   function normalizarCodigoM(c) { return String(c || "").trim().toUpperCase(); }
 
+  // Un mismo proveedor (mismo correo) puede aparecer en varias filas de la
+  // hoja "Proveedores" (una por cada nomenclatura/commodity que maneja).
+  // Al armar listas para mostrar en pantalla, nos quedamos solo con la
+  // primera fila de cada correo para no repetir al mismo proveedor.
+  function deduplicarProveedoresM(lista) {
+    var vistos = {};
+    return lista.filter(function(p) {
+      var key = String(p.correo || "").trim().toLowerCase();
+      if (!key || vistos[key]) return false;
+      vistos[key] = true;
+      return true;
+    });
+  }
+
   function agruparPorCodigoM(lista) {
     var mapa = {}, orden = [];
     lista.forEach(function(d) {
@@ -586,12 +600,12 @@
     campoProv.className = "campo-mini";
     campoProv.innerHTML = '<label>Proveedores (RFQ)</label>';
     var wrapProveedores = document.createElement("div");
-    var commodityFila = (d.commodity || "").trim().toLowerCase();
-    var opcionesProveedor = proveedoresCompletos.filter(function(p) { return (p.commodity || "").trim().toLowerCase() === commodityFila; });
+    var prefijoFila = normalizarCodigoM(d.codigo).substring(0, 3);
+    var opcionesProveedor = deduplicarProveedoresM(proveedoresCompletos.filter(function(p) { return String(p.nomenclatura || "").trim().toUpperCase() === prefijoFila; }));
     var listaProv = document.createElement("div");
     listaProv.className = "prov-list";
     if (opcionesProveedor.length === 0) {
-      listaProv.innerHTML = '<span class="text-[10.5px] italic text-on-surface-variant">Sin proveedores para este commodity</span>';
+      listaProv.innerHTML = '<span class="text-[10.5px] italic text-on-surface-variant">Sin proveedores para esta nomenclatura</span>';
     } else {
       opcionesProveedor.forEach(function(p) {
         listaProv.appendChild(crearChipProveedorM(p.correo, p.proveedor, undefined, p.proveedor + (p.contacto ? " — " + p.contacto : "")));

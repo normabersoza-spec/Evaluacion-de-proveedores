@@ -93,22 +93,39 @@ function notificarAsignacionNueva(sheet, filaNueva) {
 
 // Lee la hoja "Proveedores" y arma un mapa { PREFIJO: "NombreResponsable" }
 // a partir de la columna A (Nomenclatura, ej. "100") y la columna E
-// (Responsable). Ese mismo tab se usa para dar de alta proveedores, pero
-// las filas que solo sirven para esta asignacion por prefijo pueden dejar
-// vacias las demas columnas (Name, Commodity, etc.).
+// (Responsable). Como una misma nomenclatura puede repetirse en varias
+// filas de proveedores distintos (cada uno con su propio Responsable
+// capturado), el prefijo se asigna a quien aparezca MAS VECES para esa
+// nomenclatura (mayoria), no al de la ultima fila leida.
 function obtenerMapaPrefijosSourcing() {
-  var mapa = {};
+  var conteoPorPrefijo = {}; // { prefijo: { responsable: cantidadDeFilas, ... } }
   var ss = SpreadsheetApp.openByUrl(SHEET_URL);
   var hoja = ss.getSheetByName("Proveedores");
-  if (!hoja) return mapa;
+  if (!hoja) return {};
 
   var datos = hoja.getDataRange().getValues();
   for (var i = 1; i < datos.length; i++) {
     var prefijo = String(datos[i][0] || "").trim().toUpperCase(); // col A: Nomenclatura
     var responsable = String(datos[i][4] || "").trim();           // col E: Responsable
     if (!prefijo || !responsable) continue;
-    mapa[prefijo] = responsable;
+
+    if (!conteoPorPrefijo[prefijo]) conteoPorPrefijo[prefijo] = {};
+    conteoPorPrefijo[prefijo][responsable] = (conteoPorPrefijo[prefijo][responsable] || 0) + 1;
   }
+
+  var mapa = {};
+  Object.keys(conteoPorPrefijo).forEach(function(prefijo) {
+    var conteos = conteoPorPrefijo[prefijo];
+    var mejorResponsable = null;
+    var mejorConteo = 0;
+    Object.keys(conteos).forEach(function(responsable) {
+      if (conteos[responsable] > mejorConteo) {
+        mejorConteo = conteos[responsable];
+        mejorResponsable = responsable;
+      }
+    });
+    mapa[prefijo] = mejorResponsable;
+  });
   return mapa;
 }
 
