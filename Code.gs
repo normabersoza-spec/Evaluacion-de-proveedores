@@ -1298,7 +1298,7 @@ function renderDashboardSourcing() {
     }
   }
   template.proveedoresJson = JSON.stringify(proveedores);
-  template.logoUrl = getLogoUrl_();
+  template.logoUrl = getLogoDataUri_();
 
   var correoActual = Session.getActiveUser().getEmail() || "";
   var nombreActual = MAPA_SOURCING[correoActual.toLowerCase()] || "";
@@ -1331,7 +1331,7 @@ function renderVistaSolicitante(correoActual) {
 
   var template = HtmlService.createTemplateFromFile('Solicitudes');
   template.correoActualJson = JSON.stringify(correoActual);
-  template.logoUrl = getLogoUrl_();
+  template.logoUrl = getLogoDataUri_();
 
   template.esJefeDepartamentoJson = JSON.stringify(esJefeDepartamento);
   template.departamentoJson = JSON.stringify(esJefeDepartamento ? mapaJefes[correoLower] : "");
