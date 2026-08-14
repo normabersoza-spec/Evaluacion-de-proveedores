@@ -1035,6 +1035,21 @@
         }
         var ls = document.getElementById('loadingScreen');
         if (ls) ls.style.display = 'none';
+
+        // El dashboard se arma agregando muchos elementos al DOM de golpe
+        // (google.script.run.withSuccessHandler corre via un puente entre
+        // iframes anidados propio de Apps Script). En algunos navegadores
+        // eso deja el layout sin recalcular hasta el siguiente evento
+        // "normal" del usuario. Forzamos un reflow y repintado explicitos
+        // para que el contenido aparezca de inmediato en vez de quedar
+        // invisible hasta que algo mas dispare un repintado.
+        void document.body.offsetHeight;
+        window.dispatchEvent(new Event('resize'));
+        if (window.requestAnimationFrame) {
+          requestAnimationFrame(function() {
+            void document.body.offsetHeight;
+          });
+        }
       })
       .withFailureHandler(mostrarErrorCargaDashboard)
       .cargarDatosDashboard();
