@@ -1532,17 +1532,11 @@
     if (document.getElementById("sheetProveedoresApp").classList.contains("abierto")) { cerrarProveedoresM(); return; }
   });
 
-  // Llamada por Dashboard.html una vez que cargarDatosDashboard() responde.
-  // Esta vista reutiliza las mismas variables globales (datosCompletos,
-  // proveedoresCompletos, etc.) que ya llena inicializarVistaEscritorio()
-  // en Dashboard-Escritorio.html -- ambos scripts viven en la misma pagina.
-  function inicializarVistaMovil() {
-    activarTabM("tareas");
-    renderizarM();
-    renderizarTicketsM();
-    renderizarAdaptacionesM();
-    aplicarIdentidadM();
-    aplicarEstadoTriggerM();
-  }
+  activarTabM("tareas");
+  renderizarM();
+  renderizarTicketsM();
+  renderizarAdaptacionesM();
+  aplicarIdentidadM();
+  aplicarEstadoTriggerM();
 
 </script>

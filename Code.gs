@@ -1235,29 +1235,7 @@ function doGet(e) {
   return renderDashboardSourcing();
 }
 
-// Version "PWA-friendly": manda el HTML (con pantalla de carga) de inmediato
-// y sin tocar Sheets/Drive. Antes esta funcion leia todo Sheets ANTES de
-// devolver el primer HTML; si eso tardaba, fallaba, o el navegador no tenia
-// lista la sesion (caso tipico: PWA agregada a inicio en iPhone), Apps
-// Script se quedaba sin nada que mandar y la pagina aparecia en blanco.
-// Ahora el HTML llega primero y el propio cliente pide los datos pesados
-// con google.script.run.cargarDatosDashboard() (ver Dashboard.html).
 function renderDashboardSourcing() {
-  var template = HtmlService.createTemplateFromFile('Dashboard');
-  template.logoUrl = getLogoUrl_();
-
-  return template.evaluate()
-    .setTitle('Seguimiento de tareas')
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1.0, viewport-fit=cover')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-}
-
-// Junta todo lo que antes armaba renderDashboardSourcing() antes de generar
-// el HTML (tareas, proveedores, tickets, adaptaciones, identidad del
-// usuario, estado de automatizaciones). El cliente la llama con
-// google.script.run una vez que ya se ve la pantalla de carga, y pinta el
-// dashboard con la respuesta (ver inicializarVistaEscritorio/Movil).
-function cargarDatosDashboard() {
   var sheet = SpreadsheetApp.openByUrl(SHEET_URL).getSheets()[0];
 
   var colD = sheet.getRange("D2:D" + sheet.getMaxRows()).getValues();
@@ -1291,6 +1269,9 @@ function cargarDatosDashboard() {
     f.cotizaciones = mapaCotizaciones[key] || [];
   });
 
+  var template = HtmlService.createTemplateFromFile('Dashboard');
+  template.datosJson = JSON.stringify(filas);
+
   var hojaProveedores = SpreadsheetApp.openByUrl(SHEET_URL).getSheetByName("Proveedores");
   var proveedores = [];
   if (hojaProveedores) {
@@ -1310,26 +1291,29 @@ function cargarDatosDashboard() {
       });
     }
   }
+  template.proveedoresJson = JSON.stringify(proveedores);
+  template.logoUrl = getLogoUrl_();
 
   var correoActual = Session.getActiveUser().getEmail() || "";
   var nombreActual = MAPA_SOURCING[correoActual.toLowerCase()] || "";
   var esJefe = correoActual.toLowerCase() === CORREO_JEFE.toLowerCase();
+  template.correoActualJson = JSON.stringify(correoActual);
+  template.nombreActualJson = JSON.stringify(nombreActual);
+  template.esJefeJson = JSON.stringify(esJefe);
+  template.correoResponsableNAJson = JSON.stringify(CORREO_RESPONSABLE_NA);
 
   var estadoAutomatizaciones = { recordatorios: false, revision: false, completo: false };
   try { estadoAutomatizaciones = tieneAutomatizacionesInstaladas(); } catch (e) {}
+  template.estadoAutomatizacionesJson = JSON.stringify(estadoAutomatizaciones);
 
-  return {
-    filas: filas,
-    proveedores: proveedores,
-    correoActual: correoActual,
-    nombreActual: nombreActual,
-    esJefe: esJefe,
-    correoResponsableNA: CORREO_RESPONSABLE_NA,
-    estadoAutomatizaciones: estadoAutomatizaciones,
-    tickets: obtenerTickets(),
-    adaptaciones: obtenerAdaptaciones(),
-    proveedoresCalcas: obtenerProveedoresCalcas()
-  };
+  template.ticketsJson = JSON.stringify(obtenerTickets());
+  template.adaptacionesJson = JSON.stringify(obtenerAdaptaciones());
+  template.proveedoresCalcasJson = JSON.stringify(obtenerProveedoresCalcas());
+
+  return template.evaluate()
+    .setTitle('Seguimiento de tareas')
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1.0, viewport-fit=cover')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
 function renderVistaSolicitante(correoActual) {

@@ -863,58 +863,6 @@
     .main-wrap { margin-left: 0; }
   }
 
-  /* #app es hijo directo de <body>, que tiene display:flex;
-     flex-direction:column. Por alguna razon (confirmado con DevTools:
-     flex-shrink:1, min-height:auto, sin transform, pero altura 0 en toda
-     la cadena de hijos) el navegador estaba encogiendo #app a 0px de alto
-     una vez que su contenido se agregaba dinamicamente por JS despues de
-     la carga inicial. flex:none aqui evita que #app se pueda encoger
-     dentro de ese flex, sin importar la causa exacta. */
-  #app { flex: none; width: 100%; }
-
-  .loading-screen {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    background: linear-gradient(180deg, var(--navy) 0%, var(--navy2) 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-  }
-  .loading-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    text-align: center;
-    color: #fff;
-    max-width: 320px;
-  }
-  .loading-logo { height: 64px; width: auto; object-fit: contain; margin-bottom: 6px; }
-  .loading-content h2 { font-family: 'Hanken Grotesk', sans-serif; font-size: 18px; margin: 4px 0 0; }
-  .loading-content p { font-family: 'Inter', sans-serif; font-size: 13px; color: rgba(255,255,255,0.8); margin: 0; }
-  .spinner {
-    width: 28px; height: 28px;
-    border: 3px solid rgba(255,255,255,0.3);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: girar 0.8s linear infinite;
-  }
-  @keyframes girar { to { transform: rotate(360deg); } }
-  .error-screen button {
-    margin-top: 10px;
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 8px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    color: var(--navy);
-    background: #fff;
-    border: none;
-  }
-
 </style>
 <style id="vista-movil-style">
   .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -982,79 +930,21 @@
 </head>
 <body>
 
-<div id="loadingScreen" class="loading-screen">
-  <div class="loading-content">
-    <img src="<?!= logoUrl ?>" alt="Criotec" class="loading-logo" referrerpolicy="no-referrer">
-    <div class="spinner"></div>
-    <h2>Cargando...</h2>
-    <p>Preparando el dashboard</p>
-  </div>
-</div>
-
-<!-- Sin display:none aqui a proposito: #app es hijo directo de <body>, que
-     tiene display:flex; flex-direction:column. Alternar el display de un
-     hijo flex por JS (none -> block) colapsaba su altura a 0 en algunos
-     navegadores (bug de flexbox), dejando la pagina en blanco aunque el
-     contenido ya estuviera armado. En vez de eso, #app se queda siempre en
-     flujo normal y la pantalla de carga (position:fixed, por encima de
-     todo) es la que tapa el contenido mientras cargan los datos. -->
-<div id="app">
-
-<?!= include('Dashboard-Escritorio', { logoUrl: logoUrl }) ?>
+<?!= include('Dashboard-Escritorio', {
+  logoUrl: logoUrl,
+  datosJson: datosJson,
+  proveedoresJson: proveedoresJson,
+  correoActualJson: correoActualJson,
+  nombreActualJson: nombreActualJson,
+  esJefeJson: esJefeJson,
+  correoResponsableNAJson: correoResponsableNAJson,
+  estadoAutomatizacionesJson: estadoAutomatizacionesJson,
+  ticketsJson: ticketsJson,
+  adaptacionesJson: adaptacionesJson,
+  proveedoresCalcasJson: proveedoresCalcasJson
+}) ?>
 
 <?!= include('Dashboard-Movil', { logoUrl: logoUrl }) ?>
-
-</div>
-
-<script>
-  // Arranque de la app: el HTML de arriba ya se mando y se ve la pantalla
-  // de carga; ahora se piden los datos pesados (Sheets/Drive) al servidor.
-  // Si esto falla (p.ej. falta autorizacion), se muestra un mensaje con
-  // boton de reintentar en vez de dejar la pantalla en blanco.
-  function mostrarErrorCargaDashboard(error) {
-    if (window.console && console.error) console.error(error);
-    var ls = document.getElementById('loadingScreen');
-    if (!ls) return;
-    ls.innerHTML =
-      '<div class="loading-content error-screen">' +
-        '<h2>No se pudo cargar la aplicación</h2>' +
-        '<p>Ocurrió un problema al conectar con Google. Si esto pasa dentro de una app agregada a la pantalla de inicio, intenta abrir el enlace directo en el navegador (Safari\/Chrome) primero.</p>' +
-        '<button onclick="location.reload()">Reintentar</button>' +
-      '</div>';
-  }
-
-  document.addEventListener('DOMContentLoaded', function() {
-    google.script.run
-      .withSuccessHandler(function(datos) {
-        try {
-          if (typeof inicializarVistaEscritorio === 'function') inicializarVistaEscritorio(datos);
-          if (typeof inicializarVistaMovil === 'function') inicializarVistaMovil();
-        } catch (errInit) {
-          mostrarErrorCargaDashboard(errInit);
-          return;
-        }
-        var ls = document.getElementById('loadingScreen');
-        if (ls) ls.style.display = 'none';
-
-        // El dashboard se arma agregando muchos elementos al DOM de golpe
-        // (google.script.run.withSuccessHandler corre via un puente entre
-        // iframes anidados propio de Apps Script). En algunos navegadores
-        // eso deja el layout sin recalcular hasta el siguiente evento
-        // "normal" del usuario. Forzamos un reflow y repintado explicitos
-        // para que el contenido aparezca de inmediato en vez de quedar
-        // invisible hasta que algo mas dispare un repintado.
-        void document.body.offsetHeight;
-        window.dispatchEvent(new Event('resize'));
-        if (window.requestAnimationFrame) {
-          requestAnimationFrame(function() {
-            void document.body.offsetHeight;
-          });
-        }
-      })
-      .withFailureHandler(mostrarErrorCargaDashboard)
-      .cargarDatosDashboard();
-  });
-</script>
 
 </body>
 </html>

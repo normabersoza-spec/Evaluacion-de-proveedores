@@ -472,13 +472,7 @@
 
 <script>
 
-  // Estas variables arrancan vacias: se llenan en inicializarVistaEscritorio()
-  // cuando llega la respuesta de cargarDatosDashboard() (ver Dashboard.html).
-  // Antes se inyectaban aqui mismo desde el servidor al generar el HTML,
-  // pero eso obligaba a doGet() a leer todo Sheets/Drive ANTES de poder
-  // mandar el primer HTML: si eso tardaba o fallaba (p.ej. PWA en iPhone sin
-  // sesion lista), la pagina se quedaba en blanco sin nada que mostrar.
-  var datosCompletos = [];
+  var datosCompletos = <?!= datosJson ?>;
 
   function normalizarCodigo(c) { return String(c || "").trim().toUpperCase(); }
 
@@ -520,16 +514,16 @@
     orden.forEach(function(key) { mapa[key].sort(function(a,b){ return new Date(a.fecha) - new Date(b.fecha); }); });
     return { mapa: mapa, orden: orden };
   }
-  var proveedoresCompletos = [];
+  var proveedoresCompletos = <?!= proveedoresJson ?>;
   var proveedoresRecienAgregados = []; // solo los que se agregan en esta sesion, para la tabla de "Agregar Proveedor"
-  var correoActual = "";
-  var nombreActual = "";
-  var esJefe = false;
-  var estadoAutomatizaciones = { recordatorios: false, revision: false, completo: false };
-  var correoResponsableNA = "";
-  var datosTickets = [];
-  var datosAdaptaciones = [];
-  var proveedoresCalcas = [];
+  var correoActual = <?!= correoActualJson ?>;
+  var nombreActual = <?!= nombreActualJson ?>;
+  var esJefe = <?!= esJefeJson ?>;
+  var estadoAutomatizaciones = <?!= estadoAutomatizacionesJson ?>;
+  var correoResponsableNA = <?!= correoResponsableNAJson ?>;
+  var datosTickets = <?!= ticketsJson ?>;
+  var datosAdaptaciones = <?!= adaptacionesJson ?>;
+  var proveedoresCalcas = <?!= proveedoresCalcasJson ?>;
 
   function formatearFecha(valor) {
     if (!valor) return "";
@@ -2257,28 +2251,10 @@
   document.getElementById("tabBtnIngenieria").addEventListener("click", function() { activarTab("ingenieria"); });
   document.getElementById("tabBtnKPIs").addEventListener("click", function() { activarTab("kpis"); });
 
-  // Llamada por Dashboard.html una vez que cargarDatosDashboard() responde
-  // (ver el script de arranque al final de Dashboard.html). Reemplaza el
-  // viejo "renderizar(); renderizarTickets(); ..." que corria solo al cargar
-  // el HTML porque antes los datos ya venian inyectados server-side.
-  function inicializarVistaEscritorio(datos) {
-    datos = datos || {};
-    datosCompletos = datos.filas || [];
-    proveedoresCompletos = datos.proveedores || [];
-    correoActual = datos.correoActual || "";
-    nombreActual = datos.nombreActual || "";
-    esJefe = !!datos.esJefe;
-    estadoAutomatizaciones = datos.estadoAutomatizaciones || { recordatorios: false, revision: false, completo: false };
-    correoResponsableNA = datos.correoResponsableNA || "";
-    datosTickets = datos.tickets || [];
-    datosAdaptaciones = datos.adaptaciones || [];
-    proveedoresCalcas = datos.proveedoresCalcas || [];
-
-    renderizar();
-    renderizarTickets();
-    renderizarAdaptaciones();
-    aplicarIdentidad();
-    aplicarEstadoTrigger();
-  }
+  renderizar();
+  renderizarTickets();
+  renderizarAdaptaciones();
+  aplicarIdentidad();
+  aplicarEstadoTrigger();
 
 </script>
