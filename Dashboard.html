@@ -25,6 +25,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Seguimiento de tareas</title>
+
+<!-- PWA: manifest embebido como data URI porque Apps Script no puede
+     servir un archivo estatico manifest.json en su propia ruta (solo
+     responde via doGet con parametros de query, no rutas de archivo). -->
+<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjogIlNlZ3VpbWllbnRvIGRlIHRhcmVhcyAtIENyaW90ZWMiLCAic2hvcnRfbmFtZSI6ICJTb3VyY2luZyIsICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLCAic3RhcnRfdXJsIjogIi4iLCAib3JpZW50YXRpb24iOiAicG9ydHJhaXQiLCAiYmFja2dyb3VuZF9jb2xvciI6ICIjMDAyYTU0IiwgInRoZW1lX2NvbG9yIjogIiMwMDJhNTQiLCAiaWNvbnMiOiBbeyJzcmMiOiAiaHR0cHM6Ly9kcml2ZS5nb29nbGUuY29tL3RodW1ibmFpbD9pZD0xN0VVWlR5dGpyb3czS1JfRXprRVllYUEyY1VDRXlNaGsmc3o9dzE5MiIsICJzaXplcyI6ICIxOTJ4MTkyIiwgInR5cGUiOiAiaW1hZ2UvcG5nIn0sIHsic3JjIjogImh0dHBzOi8vZHJpdmUuZ29vZ2xlLmNvbS90aHVtYm5haWw/aWQ9MTdFVVpUeXRqcm93M0tSX0V6a0VZZWFBMmNVQ0V5TWhrJnN6PXc1MTIiLCAic2l6ZXMiOiAiNTEyeDUxMiIsICJ0eXBlIjogImltYWdlL3BuZyJ9XX0=">
+<meta name="theme-color" content="#002a54">
+
+<!-- iOS: hace que "Agregar a inicio" abra sin la barra de Safari (modo
+     standalone). Esto NO arregla el aislamiento de cookies de iOS (ver
+     nota en el chat), pero es requisito para que la PWA sea instalable. -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sourcing">
+<link rel="apple-touch-icon" href="https://drive.google.com/thumbnail?id=17EUZTytjrow3KR_EzkEYeaA2cUCEyMhk&sz=w180">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
@@ -848,6 +863,49 @@
     .main-wrap { margin-left: 0; }
   }
 
+  .loading-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: linear-gradient(180deg, var(--navy) 0%, var(--navy2) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .loading-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+    color: #fff;
+    max-width: 320px;
+  }
+  .loading-logo { height: 64px; width: auto; object-fit: contain; margin-bottom: 6px; }
+  .loading-content h2 { font-family: 'Hanken Grotesk', sans-serif; font-size: 18px; margin: 4px 0 0; }
+  .loading-content p { font-family: 'Inter', sans-serif; font-size: 13px; color: rgba(255,255,255,0.8); margin: 0; }
+  .spinner {
+    width: 28px; height: 28px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: girar 0.8s linear infinite;
+  }
+  @keyframes girar { to { transform: rotate(360deg); } }
+  .error-screen button {
+    margin-top: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--navy);
+    background: #fff;
+    border: none;
+  }
+
 </style>
 <style id="vista-movil-style">
   .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -915,21 +973,59 @@
 </head>
 <body>
 
-<?!= include('Dashboard-Escritorio', {
-  logoUrl: logoUrl,
-  datosJson: datosJson,
-  proveedoresJson: proveedoresJson,
-  correoActualJson: correoActualJson,
-  nombreActualJson: nombreActualJson,
-  esJefeJson: esJefeJson,
-  correoResponsableNAJson: correoResponsableNAJson,
-  estadoAutomatizacionesJson: estadoAutomatizacionesJson,
-  ticketsJson: ticketsJson,
-  adaptacionesJson: adaptacionesJson,
-  proveedoresCalcasJson: proveedoresCalcasJson
-}) ?>
+<div id="loadingScreen" class="loading-screen">
+  <div class="loading-content">
+    <img src="<?!= logoUrl ?>" alt="Criotec" class="loading-logo" referrerpolicy="no-referrer">
+    <div class="spinner"></div>
+    <h2>Cargando...</h2>
+    <p>Preparando el dashboard</p>
+  </div>
+</div>
+
+<div id="app" style="display:none;">
+
+<?!= include('Dashboard-Escritorio', { logoUrl: logoUrl }) ?>
 
 <?!= include('Dashboard-Movil', { logoUrl: logoUrl }) ?>
+
+</div>
+
+<script>
+  // Arranque de la app: el HTML de arriba ya se mando y se ve la pantalla
+  // de carga; ahora se piden los datos pesados (Sheets/Drive) al servidor.
+  // Si esto falla (p.ej. falta autorizacion), se muestra un mensaje con
+  // boton de reintentar en vez de dejar la pantalla en blanco.
+  function mostrarErrorCargaDashboard(error) {
+    if (window.console && console.error) console.error(error);
+    var ls = document.getElementById('loadingScreen');
+    if (!ls) return;
+    ls.innerHTML =
+      '<div class="loading-content error-screen">' +
+        '<h2>No se pudo cargar la aplicación</h2>' +
+        '<p>Ocurrió un problema al conectar con Google. Si esto pasa dentro de una app agregada a la pantalla de inicio, intenta abrir el enlace directo en el navegador (Safari\/Chrome) primero.</p>' +
+        '<button onclick="location.reload()">Reintentar</button>' +
+      '</div>';
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    google.script.run
+      .withSuccessHandler(function(datos) {
+        try {
+          if (typeof inicializarVistaEscritorio === 'function') inicializarVistaEscritorio(datos);
+          if (typeof inicializarVistaMovil === 'function') inicializarVistaMovil();
+        } catch (errInit) {
+          mostrarErrorCargaDashboard(errInit);
+          return;
+        }
+        var ls = document.getElementById('loadingScreen');
+        var app = document.getElementById('app');
+        if (ls) ls.style.display = 'none';
+        if (app) app.style.display = 'block';
+      })
+      .withFailureHandler(mostrarErrorCargaDashboard)
+      .cargarDatosDashboard();
+  });
+</script>
 
 </body>
 </html>
