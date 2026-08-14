@@ -863,6 +863,15 @@
     .main-wrap { margin-left: 0; }
   }
 
+  /* #app es hijo directo de <body>, que tiene display:flex;
+     flex-direction:column. Por alguna razon (confirmado con DevTools:
+     flex-shrink:1, min-height:auto, sin transform, pero altura 0 en toda
+     la cadena de hijos) el navegador estaba encogiendo #app a 0px de alto
+     una vez que su contenido se agregaba dinamicamente por JS despues de
+     la carga inicial. flex:none aqui evita que #app se pueda encoger
+     dentro de ese flex, sin importar la causa exacta. */
+  #app { flex: none; width: 100%; }
+
   .loading-screen {
     position: fixed;
     inset: 0;
