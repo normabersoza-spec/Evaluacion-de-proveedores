@@ -43,73 +43,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-<!-- Version FIJA a proposito (3.4.17, la ultima release de la rama v3).
-     Antes esta URL no tenia version ("...com?plugins=...") y siempre traia
-     "lo mas reciente" del CDN. Tailwind saco la v4, que cambia por completo
-     como se procesa tailwind.config = {...} (la sintaxis de abajo es de la
-     v3). Si el CDN sin version paso de v3 a v4 solo, explicaria que el
-     codigo se haya quedado identico pero las clases con colores/tamanos
-     personalizados (bg-surface-bright, text-label-md, etc.) hayan dejado
-     de aplicarse bien en la vista movil de un dia a otro sin ningun cambio
-     nuestro. Fijar la version evita que esto vuelva a pasar solo. -->
-<script src="https://cdn.tailwindcss.com/3.4.17?plugins=forms,container-queries"></script>
-<script id="tailwind-config">
-  tailwind.config = {
-    darkMode: "class",
-    theme: {
-      extend: {
-        colors: {
-          background: "#f8f9ff",
-          "surface-bright": "#f8f9ff",
-          secondary: "#005fae",
-          "on-surface": "#101c2c",
-          "on-background": "#101c2c",
-          "on-primary": "#ffffff",
-          "on-secondary": "#ffffff",
-          "on-secondary-container": "#003666",
-          "secondary-container": "#a5c8ff",
-          "on-surface-variant": "#424750",
-          "surface-container": "#e6eeff",
-          "surface-container-high": "#dde9ff",
-          "surface-container-lowest": "#ffffff",
-          "surface-variant": "#d7e3f9",
-          outline: "#737781",
-          "outline-variant": "#c2c6d1",
-          primary: "#002a54",
-          "primary-container": "#00407a",
-        },
-        borderRadius: { DEFAULT: "0.375rem", lg: "0.5rem", xl: "0.9rem", full: "999px" },
-        spacing: { sm: "12px", xl: "32px", gutter: "20px", "container-max": "1440px", xs: "8px", lg: "24px", md: "16px", base: "4px" },
-        fontFamily: {
-          "display-lg": ["Hanken Grotesk"],
-          "headline-lg": ["Hanken Grotesk"],
-          "headline-md": ["Hanken Grotesk"],
-          "headline-sm": ["Hanken Grotesk"],
-          "headline-xl": ["Hanken Grotesk"],
-          "label-md": ["Inter"],
-          "label-sm": ["Inter"],
-          "body-lg": ["Inter"],
-          "body-md": ["Inter"],
-          "body-sm": ["Inter"],
-          "data-tabular": ["Inter"],
-        },
-        fontSize: {
-          "display-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "700" }],
-          "headline-xl": ["28px", { lineHeight: "36px", letterSpacing: "-0.01em", fontWeight: "700" }],
-          "headline-lg": ["24px", { lineHeight: "32px", fontWeight: "700" }],
-          "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
-          "headline-sm": ["20px", { lineHeight: "28px", fontWeight: "600" }],
-          "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600" }],
-          "label-sm": ["10.5px", { lineHeight: "14px", letterSpacing: "0.05em", fontWeight: "600" }],
-          "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
-          "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
-          "body-sm": ["12.5px", { lineHeight: "18px", fontWeight: "400" }],
-          "data-tabular": ["13px", { lineHeight: "18px", fontWeight: "500" }],
-        },
-      },
-    },
-  };
-</script>
 
 <style>
 
@@ -867,74 +800,8 @@
   .tabla-comp .precio-cell { font-family: 'Inter', sans-serif; font-weight: 700; }
   .tabla-comp .pendiente { color: var(--text-faint); font-style: italic; font-size: 11.5px; }
 
-  @media (max-width: 900px) {
-    .sidebar { display: none; }
-    .main-wrap { margin-left: 0; }
-  }
 
 </style>
-<style id="vista-movil-style">
-  .no-scrollbar::-webkit-scrollbar { display: none; }
-  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  #vistaMovilRoot .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 20; vertical-align: middle; }
-  #vistaMovilRoot input:focus, #vistaMovilRoot select:focus, #vistaMovilRoot textarea:focus { outline: none; }
-  .sheet-overlay { display: none; }
-  .sheet-overlay.abierto { display: flex; }
-
-  .nav-toplevel, .nav-subview { color: #424750; border-radius: 6px; }
-  .nav-toplevel.activo, .nav-subview.activo { color: #005fae; font-weight: 700; background: rgba(0,95,174,0.08); border-left: 4px solid #005fae; }
-  .bottom-nav-item { color: #424750; }
-  .bottom-nav-item .material-symbols-outlined { font-size: 22px; }
-  .bottom-nav-item.activo { color: #005fae; }
-  .filtro-chip { background: #fff; border: 1px solid #c2c6d1; border-radius: 6px; padding: 6px 10px; font-size: 12px; color: #101c2c; flex-shrink: 0; }
-  .kpi-card { background: #fff; border: 1px solid #c2c6d1; border-top: 3px solid #005fae; border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
-  .kpi-lbl { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #737781; }
-  .kpi-num { font-family: 'Hanken Grotesk', sans-serif; font-size: 24px; font-weight: 800; color: #101c2c; }
-  .badge { display:inline-flex; align-items:center; padding:2px 9px; border-radius:999px; font-size:10px; font-weight:700; text-transform:uppercase; white-space:nowrap; border:1px solid transparent; }
-  .campo-mini label { font-size: 10.5px; font-weight: 600; color: #737781; text-transform: uppercase; display:block; margin-bottom: 3px; }
-  .campo-mini input, .campo-mini select, .campo-mini textarea { width:100%; background:#f8f9ff; border:1px solid #c2c6d1; border-radius:6px; padding:6px 8px; font-size:12.5px; color:#101c2c; }
-  .btn-mini { font-size: 11.5px; font-weight: 600; padding: 6px 11px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
-  .btn-mini-primary { background:#005fae; color:#fff; border:1px solid #005fae; }
-  .btn-mini-outline { background:#fff; color:#005fae; border:1px solid #a6c8ff; }
-  .btn-mini-danger { background:#fff; color:#b3261e; border:1px solid #f8c6c1; }
-  .btn-mini-green { background:#fff; color:#146c43; border:1px solid #b7ebd0; }
-  .btn-mini:disabled { opacity: .5; cursor: default; }
-  .prov-list { max-height: 120px; overflow-y: auto; overflow-x: hidden; display:flex; flex-wrap:wrap; gap:5px; align-content:flex-start; }
-  .prov-item { display:inline-flex; align-items:center; gap:3px; font-size:10.5px; color:#424750; padding:4px 9px; border-radius:999px; border:1px solid #c2c6d1; background:#fff; max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .prov-item.seleccionado { background:#dbeafe; border-color:#005fae; color:#005fae; font-weight:700; }
-  .prov-item input { display:none; }
-  .prov-item .check-ico { display:none; font-size:11px; flex-shrink:0; }
-  .prov-item.seleccionado .check-ico { display:inline-block; }
-
-</style>
-<style>
-  /* El interruptor de vista lo decide JS (window.innerWidth), no solo CSS,
-     porque el iframe sandboxed de Apps Script a veces no reporta bien el
-     ancho real del dispositivo con @media sola. */
-  #vistaEscritorioRoot { display: block; }
-  #vistaMovilRoot { display: none; }
-  html.vista-movil-activa #vistaEscritorioRoot { display: none !important; }
-  html.vista-movil-activa #vistaMovilRoot { display: block !important; }
-  html.vista-escritorio-activa #vistaEscritorioRoot { display: block !important; }
-  html.vista-escritorio-activa #vistaMovilRoot { display: none !important; }
-  @media (max-width: 900px) {
-    #vistaEscritorioRoot { display: none; }
-    #vistaMovilRoot { display: block; }
-  }
-</style>
-<script>
-  (function() {
-    function actualizarVistaResponsive() {
-      var esMovil = window.innerWidth <= 900;
-      document.documentElement.classList.toggle('vista-movil-activa', esMovil);
-      document.documentElement.classList.toggle('vista-escritorio-activa', !esMovil);
-    }
-    actualizarVistaResponsive();
-    window.addEventListener('resize', actualizarVistaResponsive);
-    window.addEventListener('orientationchange', actualizarVistaResponsive);
-    document.addEventListener('DOMContentLoaded', actualizarVistaResponsive);
-  })();
-</script>
 
 </head>
 <body>
@@ -952,8 +819,6 @@
   adaptacionesJson: adaptacionesJson,
   proveedoresCalcasJson: proveedoresCalcasJson
 }) ?>
-
-<?!= include('Dashboard-Movil', { logoUrl: logoUrl }) ?>
 
 </body>
 </html>

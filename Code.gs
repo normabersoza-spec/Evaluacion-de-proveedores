@@ -1868,8 +1868,8 @@ function enviarAdaptacionAProveedor(filaIndex, proveedoresSeleccionados) {
 }
 
 // ============================================================================
-// HTML separado en 3 archivos: Dashboard.html (shell), Dashboard-Escritorio.html
-// (vista web) y Dashboard-Movil.html (vista app).
+// HTML separado en 2 archivos: Dashboard.html (shell) y Dashboard-Escritorio.html
+// (vista web).
 // ============================================================================
 function include(nombreArchivo, templatePadre) {
   var t = HtmlService.createTemplateFromFile(nombreArchivo);
