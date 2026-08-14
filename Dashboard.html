@@ -982,7 +982,14 @@
   </div>
 </div>
 
-<div id="app" style="display:none;">
+<!-- Sin display:none aqui a proposito: #app es hijo directo de <body>, que
+     tiene display:flex; flex-direction:column. Alternar el display de un
+     hijo flex por JS (none -> block) colapsaba su altura a 0 en algunos
+     navegadores (bug de flexbox), dejando la pagina en blanco aunque el
+     contenido ya estuviera armado. En vez de eso, #app se queda siempre en
+     flujo normal y la pantalla de carga (position:fixed, por encima de
+     todo) es la que tapa el contenido mientras cargan los datos. -->
+<div id="app">
 
 <?!= include('Dashboard-Escritorio', { logoUrl: logoUrl }) ?>
 
@@ -1018,9 +1025,7 @@
           return;
         }
         var ls = document.getElementById('loadingScreen');
-        var app = document.getElementById('app');
         if (ls) ls.style.display = 'none';
-        if (app) app.style.display = 'block';
       })
       .withFailureHandler(mostrarErrorCargaDashboard)
       .cargarDatosDashboard();
