@@ -43,7 +43,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Version FIJA a proposito (3.4.17, la ultima release de la rama v3).
+     Antes esta URL no tenia version ("...com?plugins=...") y siempre traia
+     "lo mas reciente" del CDN. Tailwind saco la v4, que cambia por completo
+     como se procesa tailwind.config = {...} (la sintaxis de abajo es de la
+     v3). Si el CDN sin version paso de v3 a v4 solo, explicaria que el
+     codigo se haya quedado identico pero las clases con colores/tamanos
+     personalizados (bg-surface-bright, text-label-md, etc.) hayan dejado
+     de aplicarse bien en la vista movil de un dia a otro sin ningun cambio
+     nuestro. Fijar la version evita que esto vuelva a pasar solo. -->
+<script src="https://cdn.tailwindcss.com/3.4.17?plugins=forms,container-queries"></script>
 <script id="tailwind-config">
   tailwind.config = {
     darkMode: "class",
