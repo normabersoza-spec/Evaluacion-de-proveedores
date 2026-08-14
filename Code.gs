@@ -37,19 +37,13 @@ function getLogoDataUri_() {
 
 // Logo del Dashboard: en vez de embeber la imagen, se sirve como una URL
 // normal de Drive (el navegador la descarga aparte, no infla el HTML).
-// Se asegura que el archivo sea visible por link para que cargue sin pedir
-// autenticacion.
+// IMPORTANTE: el archivo LOGO_FILE_ID debe estar compartido manualmente
+// como "Cualquier persona con el enlace" desde Drive (clic derecho >
+// Compartir). No se cambia el permiso desde el codigo porque eso obliga
+// a Apps Script a pedir un permiso de Drive mas amplio (escritura) para
+// TODO el proyecto, lo cual rompe la app hasta que se vuelva a autorizar.
 function getLogoUrl_() {
-  try {
-    var logoFile = DriveApp.getFileById(LOGO_FILE_ID);
-    if (logoFile.getSharingAccess() === DriveApp.Access.PRIVATE) {
-      logoFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-    }
-    return "https://drive.google.com/thumbnail?id=" + LOGO_FILE_ID + "&sz=w400";
-  } catch (e) {
-    Logger.log('getLogoUrl_ error: ' + e.message);
-    return '';
-  }
+  return "https://drive.google.com/thumbnail?id=" + LOGO_FILE_ID + "&sz=w400";
 }
 
 var MAPA_SOURCING = {
